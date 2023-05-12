@@ -1,0 +1,51 @@
+---
+layout: page
+title: Hallo!
+background: '/img/bg-index.jpg'
+---
+
+<p>Im Rahmen meiner Dissertation untersuche ich den Einfluss verschiedener Bewirtschaftungsstrategien auf die Biodiversität von Wiesen und Weiden.</p>
+<p>Das Projekt wird in den Forschungsgruppen 
+  <a href="https://www.agroscope.admin.ch/agroscope/de/home/ueber-uns/organisation/kompetenzbereiche-strategische-forschungsbereiche/produktionssysteme-tiere-tiergesundheit/futterbau-graslandsysteme.html">Futterbau und Graslandsysteme</a> 
+  und 
+  <a href="https://www.agroscope.admin.ch/agroscope/de/home/ueber-uns/organisation/kompetenzbereiche-strategische-forschungsbereiche/agraroekologie-umwelt/agrarlandschaft-biodiversitaet.html">Agrarlandschaft und Biodiversität</a> 
+  von 
+  <a href="  https://www.agroscope.admin.ch/agroscope/de/home.html">Agroscope</a> 
+  durchgeführt.</p>
+
+{% for post in site.posts %}
+
+<article class="post-preview">
+  <a href="{{ post.url | prepend: site.baseurl | replace: '//', '/' }}">
+    <h2 class="post-title">{{ post.title }}</h2>
+    {% if post.subtitle %}
+    <h3 class="post-subtitle">{{ post.subtitle }}</h3>
+    {% else %}
+    <h3 class="post-subtitle">{{ post.excerpt | strip_html | truncatewords: 15 }}</h3>
+    {% endif %}
+  </a>
+  <p class="post-meta">{{ post.date | date: '%B %d, %Y' }} &middot; {% include read_time.html content=post.content %}
+  </p>
+</article>
+
+<hr>
+
+{% endfor %}
+
+<!-- Pager -->
+{% if paginator.total_pages > 1 %}
+
+<div class="clearfix">
+
+  {% if paginator.previous_page %}
+  <a class="btn btn-primary float-left" href="{{ paginator.previous_page_path | prepend: site.baseurl | replace: '//', '/' }}">&larr;
+    Newer<span class="d-none d-md-inline"> Posts</span></a>
+  {% endif %}
+
+  {% if paginator.next_page %}
+  <a class="btn btn-primary float-right" href="{{ paginator.next_page_path | prepend: site.baseurl | replace: '//', '/' }}">Older<span class="d-none d-md-inline"> Posts</span> &rarr;</a>
+  {% endif %}
+
+</div>
+
+{% endif %}
