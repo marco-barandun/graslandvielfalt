@@ -40,35 +40,49 @@ plots <- read_csv("./2023-joinedPlotSelection_v2.csv") %>%
   select(ID, elevation, canton, municipality, mgroup, LU1980, LU2000, LU2020, LNF_Code, everything()) %>%
   arrange(priority, elevation)
 
-write_csv(plots, "./2023-joinedPlotSelection_v3.csv")
+#write_csv(plots, "./2023-joinedPlotSelection_v3.csv")
+plots <- read_csv("./2023-joinedPlotSelection_v3.csv")
   
 (t <- DT::datatable(plots,
                     class = "display nowrap",
                     escape = F,
                     rownames = FALSE))
 
-htmltools::save_html(t, file="2023-plot-table.html")
+#htmltools::save_html(t, file="2023-plot-table.html")
 
-plots_map <- plots %>%
-  filter(priority %in% c("MP1", "MP2", "P1"))
 
-pal <- colorFactor(palette = "viridis", domain = plots_map$priority)
 
 # Create a leaflet map with the Swiss Topographic Map as a basemap
-m <- leaflet(plots_map) %>%
-  addTiles(urlTemplate = "https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg",
-           attribution = '&copy; <a href="https://www.geo.admin.ch/de/about-swiss-geoportal/impressum.html#copyright">swisstopo</a>') %>% 
-  addCircleMarkers(data = plots_map, 
-             lat = ~Latitude, lng = ~Longitude,
-             popup = ~paste(ID, round(elevation, 0), sep = " - "),
-             radius = 8, stroke = FALSE, fillOpacity = 1, color = ~pal(priority),) %>%
-  
-  #addPopups(lat = ~Latitude, lng = ~Longitude, ~paste(ID, round(elevation, 0), sep = " - "),
-  #          options = popupOptions(closeOnClick = FALSE, closeButton = FALSE, direction = 'auto')) %>%
-  
-  addLegend(pal = pal, values = plots_map$priority,
-            position = "bottomright", title = "Value") %>%
-  addScaleBar(position = "bottomleft") %>%
-  setView(lng = 9, lat = 46.4, zoom = 8)
+
+# Define a color palette with distinct colors
+pal <- colorFactor(
+  palette = c("red", "orange", "yellow", "green", "blue", "purple", "magenta"),
+  domain = plots$priority
+)
+
+# Create a leaflet map with the Swiss Topographic Map as a basemap
+(m <- leaflet(plots) %>%
+    addTiles(urlTemplate = "https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg",
+             attribution = '&copy; <a href="https://www.geo.admin.ch/de/about-swiss-geoportal/impressum.html#copyright">swisstopo</a>') %>% 
+    
+    # Add a button for each category in the priority variable
+    addLayersControl(
+      overlayGroups = unique(plots$priority), 
+      options = layersControlOptions(collapsed = TRUE)
+    ) %>%
+    
+    addCircleMarkers(data = plots, 
+                     lat = ~Latitude, lng = ~Longitude,
+                     popup = ~paste(ID, round(elevation, 0), sep = " - "),
+                     radius = 8, stroke = FALSE, fillOpacity = 1, color = ~pal(priority),
+                     group = ~priority) %>%
+    
+    addLegend(pal = pal, values = plots$priority,
+              position = "bottomright", title = "Value") %>%
+    addScaleBar(position = "bottomleft") %>%
+    setView(lng = 9, lat = 46.4, zoom = 8) %>% 
+    hideGroup(c("MP3", "MP4", "MP5", "MP6", "MP7",
+                "P2", "P3")))
+        
 
 htmlwidgets::saveWidget(m, file=paste("./2023-plot-map.html", sep = ""))
