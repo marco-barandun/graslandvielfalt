@@ -77,8 +77,7 @@ pal <- colorFactor(
     addLegend(pal = pal, values = plots$priority,
               position = "bottomright", title = "Value") %>%
     addScaleBar(position = "bottomleft") %>%
-    setView(lng = 9, lat = 46.4, zoom = 8) 
-  ) %>%
+    setView(lng = 9, lat = 46.4, zoom = 8) %>%
   addPolygons(data = poly, 
                 fill = FALSE, 
                 color = "darkorange", 
@@ -97,6 +96,7 @@ pal <- colorFactor(
                     clusterOptions = markerClusterOptions(removeOutsideVisibleBounds = FALSE),
                     group = "Done Plots") %>% 
   hideGroup("Bewirtschaftungseinheiten") #"MP3", "MP4", "MP5", "MP6", "MP7", "P2", "P3"
+)
 
 
 htmlwidgets::saveWidget(m, file=paste("./2023-plot-map.html", sep = ""))
