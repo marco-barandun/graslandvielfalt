@@ -5,23 +5,8 @@ library(tidyverse)
 library(sf)
 library(htmltools)
 
-setwd("/Users/marco/GitHub/wiesenbiodiversitaet/R_files")
-
-get_municipality <- function(coords_df, shapefile, what) {
-  
-  # Remove points that are located in the ocean
-  occs <- sp::SpatialPointsDataFrame(coords = coords_df %>% dplyr::select(Longitude, Latitude), 
-                                     data = coords_df) ##check columns for long/lat
-  
-  shapefile_sp <- as(shapefile, "Spatial")
-  
-  raster::crs(occs) <- raster::crs(shapefile_sp)
-  ovr <- sp::over(occs, shapefile_sp) %>% ###overlay world and points
-    dplyr::select(what)
-  
-  ds <- cbind(coords_df, ovr)
-  
-}
+setwd("/Users/marco/GitHub/graslandvielfalt/R_files")
+source("./config_plot_map.R")
 
 municipalities <- st_read("/Users/marco/kDocuments_Marco/PhD/server/1_original_data/gadm41_CHE.gpkg",
                           layer = "ADM_ADM_3")
@@ -44,6 +29,13 @@ plots <- read_csv("./2023-joinedPlotSelection_v2.csv") %>%
 donePlots <- read_csv("./2023-donePlots.csv") %>%
   filter(!is.na(Done))
 
+poly <- rgdal::readOGR("/Users/marco/kDocuments_Marco/PhD/server/1_original_data/shapefiles/be_bewirtschaftungseinheit_view.shp") %>%
+  get_polygons(plots = plots, shapefile = ., radius_m = 500)
+
+########################################################################################################################################
+### Create plot table #################################################################################################################
+########################################################################################################################################
+
 #write_csv(plots, "./2023-joinedPlotSelection_v3.csv")
 plots <- read_csv("./2023-joinedPlotSelection_v3.csv")
   
@@ -55,8 +47,9 @@ plots <- read_csv("./2023-joinedPlotSelection_v3.csv")
 #htmltools::save_html(t, file="2023-plot-table.html")
 
 
-
-# Create a leaflet map with the Swiss Topographic Map as a basemap
+########################################################################################################################################
+### Create a leaflet map with the Swiss Topographic Map as a basemap ###################################################################
+########################################################################################################################################
 
 # Define a color palette with distinct colors
 pal <- colorFactor(
@@ -71,7 +64,7 @@ pal <- colorFactor(
     
     # Add a button for each category in the priority variable
     addLayersControl(
-      overlayGroups = c(unique(plots$priority), "Done Plots"), 
+      overlayGroups = c(unique(plots$priority), "Done Plots", "Bewirtschaftungseinheiten"), 
       options = layersControlOptions(collapsed = TRUE)
     ) %>%
     
@@ -84,10 +77,13 @@ pal <- colorFactor(
     addLegend(pal = pal, values = plots$priority,
               position = "bottomright", title = "Value") %>%
     addScaleBar(position = "bottomleft") %>%
-    setView(lng = 9, lat = 46.4, zoom = 8) #%>% 
-    #hideGroup(c("MP3", "MP4", "MP5", "MP6", "MP7",
-    #            "P2", "P3"))
+    setView(lng = 9, lat = 46.4, zoom = 8) 
   ) %>%
+  addPolygons(data = poly, 
+                fill = FALSE, 
+                color = "darkorange", 
+                opacity = 0.9,
+                group = "Bewirtschaftungseinheiten") %>%
   addAwesomeMarkers(data = donePlots,
                     lat = ~Latitude, lng = ~Longitude,
                     icon = ~awesomeIcons(
@@ -99,8 +95,19 @@ pal <- colorFactor(
                     labelOptions = labelOptions(noHide = TRUE, textOnly = TRUE),
                     label = lapply(donePlots$ID, HTML),
                     clusterOptions = markerClusterOptions(removeOutsideVisibleBounds = FALSE),
-                    group = "Done Plots")
-
+                    group = "Done Plots") %>% 
+  hideGroup("Bewirtschaftungseinheiten") #"MP3", "MP4", "MP5", "MP6", "MP7", "P2", "P3"
 
 
 htmlwidgets::saveWidget(m, file=paste("./2023-plot-map.html", sep = ""))
+
+
+###### CREATING THE MUNICIPALITY MAP ############################################
+
+municipalities <- read_csv("./2023-joinedPlotSelection_v2.csv") %>%
+  get_municipality(., municipalities, what = c("NAME_1", "NAME_3")) %>%
+  rename(canton = NAME_1,
+         municipality = NAME_3) %>%
+  select(canton, municipality)
+
+
