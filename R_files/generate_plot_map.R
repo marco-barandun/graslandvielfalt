@@ -3,6 +3,7 @@ library(DT)
 library(scales)
 library(tidyverse)
 library(sf)
+library(htmltools)
 
 setwd("/Users/marco/GitHub/wiesenbiodiversitaet/R_files")
 
@@ -40,6 +41,9 @@ plots <- read_csv("./2023-joinedPlotSelection_v2.csv") %>%
   select(ID, elevation, canton, municipality, mgroup, LU1980, LU2000, LU2020, LNF_Code, everything()) %>%
   arrange(priority, elevation)
 
+donePlots <- read_csv("./2023-donePlots.csv") %>%
+  filter(!is.na(Done))
+
 #write_csv(plots, "./2023-joinedPlotSelection_v3.csv")
 plots <- read_csv("./2023-joinedPlotSelection_v3.csv")
   
@@ -67,7 +71,7 @@ pal <- colorFactor(
     
     # Add a button for each category in the priority variable
     addLayersControl(
-      overlayGroups = unique(plots$priority), 
+      overlayGroups = c(unique(plots$priority), "Done Plots"), 
       options = layersControlOptions(collapsed = TRUE)
     ) %>%
     
@@ -83,7 +87,20 @@ pal <- colorFactor(
     setView(lng = 9, lat = 46.4, zoom = 8) #%>% 
     #hideGroup(c("MP3", "MP4", "MP5", "MP6", "MP7",
     #            "P2", "P3"))
-  )
-        
+  ) %>%
+  addAwesomeMarkers(data = donePlots,
+                    lat = ~Latitude, lng = ~Longitude,
+                    icon = ~awesomeIcons(
+                      icon = "leaf",
+                      markerColor = "green",
+                      iconColor = "white",
+                      library = "fa"
+                    ),
+                    labelOptions = labelOptions(noHide = TRUE, textOnly = TRUE),
+                    label = lapply(donePlots$ID, HTML),
+                    clusterOptions = markerClusterOptions(removeOutsideVisibleBounds = FALSE),
+                    group = "Done Plots")
+
+
 
 htmlwidgets::saveWidget(m, file=paste("./2023-plot-map.html", sep = ""))
