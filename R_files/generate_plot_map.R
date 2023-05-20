@@ -11,33 +11,41 @@ source("./config_plot_map.R")
 municipalities <- st_read("/Users/marco/kDocuments_Marco/PhD/server/1_original_data/gadm41_CHE.gpkg",
                           layer = "ADM_ADM_3")
 
-plots <- read_csv("./2023-joinedPlotSelection_v2.csv") %>%
-  get_municipality(., municipalities, what = c("NAME_1", "NAME_3")) %>%
-  rename(canton = NAME_1,
-         municipality = NAME_3) %>%
-  mutate(priority = gsub("A", "", priority)) %>%
-  arrange(priority, canton, municipality, elevation) %>%
-  group_by(municipality) %>%
-  mutate(ID = paste0(priority, "-",
-                     toupper(substr(canton, 1, 2)), "-", 
-                     toupper(substr(municipality, 1, 2)), "-", 
-                     row_number())) %>%
-  ungroup() %>%
-  select(ID, elevation, canton, municipality, mgroup, LU1980, LU2000, LU2020, LNF_Code, everything()) %>%
-  arrange(priority, elevation)
+#plots <- read_csv("./2023-joinedPlotSelection_v2.csv") %>%
+#  get_municipality(., municipalities, what = c("NAME_1", "NAME_3")) %>%
+#  rename(canton = NAME_1,
+#         municipality = NAME_3) %>%
+#  mutate(priority = gsub("A", "", priority)) %>%
+#  arrange(priority, canton, municipality, elevation) %>%
+#  group_by(municipality) %>%
+#  mutate(ID = paste0(priority, "-",
+#                     toupper(substr(canton, 1, 2)), "-", 
+#                     toupper(substr(municipality, 1, 2)), "-", 
+#                     row_number())) %>%
+#  ungroup() %>%
+#  select(ID, elevation, canton, municipality, mgroup, LU1980, LU2000, LU2020, LNF_Code, everything()) %>%
+#  arrange(priority, elevation)
+
+#write_csv(plots, "./2023-joinedPlotSelection_v3.csv")
+plots <- read_csv("./2023-joinedPlotSelection_v3.csv")
 
 donePlots <- read_csv("./2023-donePlots.csv") %>%
   filter(!is.na(Done))
 
-poly <- rgdal::readOGR("/Users/marco/kDocuments_Marco/PhD/server/1_original_data/shapefiles/be_bewirtschaftungseinheit_view.shp") %>%
-  get_polygons(plots = plots, shapefile = ., radius_m = 500)
+#be <- rgdal::readOGR("/Users/marco/kDocuments_Marco/PhD/server/1_original_data/shapefiles/be_bewirtschaftungseinheit_view.shp")
+
+#poly <- be %>%
+#  get_polygons(plots = plots, shapefile = ., radius_m = 500)
+#
+#writeOGR(poly, dsn = "./2023-plots-with-be-poly.geojson", 
+#         layer = ogrListLayers("/Users/marco/kDocuments_Marco/PhD/server/1_original_data/shapefiles/be_bewirtschaftungseinheit_view.shp")[1],
+#         driver = "GeoJSON")
+
+poly <- readOGR("./2023-plots-with-be-poly.geojson")
 
 ########################################################################################################################################
 ### Create plot table #################################################################################################################
 ########################################################################################################################################
-
-#write_csv(plots, "./2023-joinedPlotSelection_v3.csv")
-plots <- read_csv("./2023-joinedPlotSelection_v3.csv")
   
 (t <- DT::datatable(plots,
                     class = "display nowrap",
