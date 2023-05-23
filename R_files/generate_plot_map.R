@@ -8,8 +8,7 @@ library(htmltools)
 setwd("/Users/marco/GitHub/graslandvielfalt/R_files")
 source("./config_plot_map.R")
 
-municipalities <- st_read("/Users/marco/kDocuments_Marco/PhD/server/1_original_data/gadm41_CHE.gpkg",
-                          layer = "ADM_ADM_3")
+#municipalities <- st_read("./gadm41_CHE.gpkg", layer = "ADM_ADM_3")
 
 #plots <- read_csv("./2023-joinedPlotSelection_v2.csv") %>%
 #  get_municipality(., municipalities, what = c("NAME_1", "NAME_3")) %>%
@@ -41,7 +40,7 @@ donePlots <- read_csv("./2023-donePlots.csv") %>%
 #         layer = ogrListLayers("/Users/marco/kDocuments_Marco/PhD/server/1_original_data/shapefiles/be_bewirtschaftungseinheit_view.shp")[1],
 #         driver = "GeoJSON")
 
-poly <- readOGR("./2023-plots-with-be-poly.geojson")
+poly <- rgdal::readOGR("./2023-plots-with-be-poly.geojson")
 
 ########################################################################################################################################
 ### Create plot table #################################################################################################################
