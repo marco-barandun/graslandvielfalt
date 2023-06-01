@@ -106,6 +106,53 @@ pal <- colorFactor(
 )
 
 
+
+(m <- leaflet(plots) %>%
+    addTiles(urlTemplate = "https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg",
+             attribution = '&copy; <a href="https://www.geo.admin.ch/de/about-swiss-geoportal/impressum.html#copyright">swisstopo</a>',
+             group = "Swiss Topographic Map") %>%
+    addTiles(urlTemplate = "https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.swissimage/default/current/3857/{z}/{x}/{y}.jpeg",
+             attribution = '&copy; <a href="https://www.geo.admin.ch/de/about-swiss-geoportal/impressum.html#copyright">swisstopo</a>',
+             group = "Satellite View") %>%
+    addLayersControl(
+      baseGroups = c("Swiss Topographic Map", "Satellite View"),
+      overlayGroups = c(unique(plots$priority), "Done Plots", "Bewirtschaftungseinheiten"),
+      options = layersControlOptions(collapsed = TRUE)
+    ) %>%
+    addCircleMarkers(data = plots, 
+                     lat = ~Latitude, lng = ~Longitude,
+                     popup = ~paste(ID, round(elevation, 0), sep = " - "),
+                     radius = 8, stroke = FALSE, fillOpacity = 1, color = ~pal(priority),
+                     group = ~priority) %>%
+    addLegend(pal = pal, values = plots$priority,
+              position = "bottomright", title = "Value") %>%
+    addScaleBar(position = "bottomleft") %>%
+    setView(lng = 9, lat = 46.4, zoom = 8) %>%
+    addPolygons(data = poly, 
+                fill = FALSE, 
+                color = "darkorange", 
+                opacity = 0.9,
+                group = "Bewirtschaftungseinheiten") %>%
+    addAwesomeMarkers(data = donePlots,
+                      lat = ~Latitude, lng = ~Longitude,
+                      icon = ~awesomeIcons(
+                        icon = "leaf",
+                        markerColor = "green",
+                        iconColor = "white",
+                        library = "fa"
+                      ),
+                      labelOptions = labelOptions(noHide = TRUE, textOnly = TRUE),
+                      label = lapply(donePlots$ID, HTML),
+                      clusterOptions = markerClusterOptions(removeOutsideVisibleBounds = FALSE),
+                      group = "Done Plots") %>% 
+    hideGroup(c("Bewirtschaftungseinheiten", "MP5", "MP6", "MP7", "P3"))
+)
+
+
+
+
+
+
 htmlwidgets::saveWidget(m, file=paste("./2023-plot-map.html", sep = ""))
 
 
