@@ -29,7 +29,7 @@ source("./config_plot_map.R")
 plots <- read_csv("./2023-joinedPlotSelection_v3.csv")
 
 donePlots <- read_csv("./2023-donePlots.csv") %>%
-  filter(!is.na(Done))
+  filter(Done == 1)
 
 #be <- rgdal::readOGR("/Users/marco/kDocuments_Marco/PhD/server/1_original_data/shapefiles/be_bewirtschaftungseinheit_view.shp")
 
@@ -158,10 +158,10 @@ htmlwidgets::saveWidget(m, file=paste("./2023-plot-map.html", sep = ""))
 
 ###### CREATING THE MUNICIPALITY MAP ############################################
 
-municipalities <- read_csv("./2023-joinedPlotSelection_v2.csv") %>%
-  get_municipality(., municipalities, what = c("NAME_1", "NAME_3")) %>%
-  rename(canton = NAME_1,
-         municipality = NAME_3) %>%
-  select(canton, municipality)
+#municipalities <- read_csv("./2023-joinedPlotSelection_v2.csv") %>%
+#  get_municipality(., municipalities, what = c("NAME_1", "NAME_3")) %>%
+#  rename(canton = NAME_1,
+#         municipality = NAME_3) %>%
+#  select(canton, municipality)
 
 
