@@ -26,10 +26,13 @@ source("./config_plot_map.R")
 #  arrange(priority, elevation)
 
 #write_csv(plots, "./2023-joinedPlotSelection_v3.csv")
-plots <- read_csv("./2023-joinedPlotSelection_v3.csv")
 
 donePlots <- read_csv("./2023-donePlots.csv") %>%
   filter(Done == 1)
+
+plots <- read_csv("./2023-joinedPlotSelection_v3.csv") %>%
+  filter(!priority %in% c("MP5", "MP6", "MP7", "P3")) %>%
+  filter(!ID %in% donePlots$ID)
 
 #be <- rgdal::readOGR("/Users/marco/kDocuments_Marco/PhD/server/1_original_data/shapefiles/be_bewirtschaftungseinheit_view.shp")
 
@@ -51,7 +54,7 @@ poly <- rgdal::readOGR("./2023-plots-with-be-poly.geojson")
                     escape = F,
                     rownames = FALSE))
 
-#htmltools::save_html(t, file="2023-plot-table.html")
+htmltools::save_html(t, file="2023-plot-table.html")
 
 
 ########################################################################################################################################
@@ -65,47 +68,49 @@ pal <- colorFactor(
 )
 
 # Create a leaflet map with the Swiss Topographic Map as a basemap
-(m <- leaflet(plots) %>%
-    addTiles(urlTemplate = "https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg",
-             attribution = '&copy; <a href="https://www.geo.admin.ch/de/about-swiss-geoportal/impressum.html#copyright">swisstopo</a>') %>% 
-    
-    # Add a button for each category in the priority variable
-    addLayersControl(
-      overlayGroups = c(unique(plots$priority), "Done Plots", "Bewirtschaftungseinheiten"), 
-      options = layersControlOptions(collapsed = TRUE)
-    ) %>%
-    
-    addCircleMarkers(data = plots, 
-                     lat = ~Latitude, lng = ~Longitude,
-                     popup = ~paste(ID, round(elevation, 0), sep = " - "),
-                     radius = 8, stroke = FALSE, fillOpacity = 1, color = ~pal(priority),
-                     group = ~priority) %>%
-    
-    addLegend(pal = pal, values = plots$priority,
-              position = "bottomright", title = "Value") %>%
-    addScaleBar(position = "bottomleft") %>%
-    setView(lng = 9, lat = 46.4, zoom = 8) %>%
-  addPolygons(data = poly, 
-                fill = FALSE, 
-                color = "darkorange", 
-                opacity = 0.9,
-                group = "Bewirtschaftungseinheiten") %>%
-  addAwesomeMarkers(data = donePlots,
-                    lat = ~Latitude, lng = ~Longitude,
-                    icon = ~awesomeIcons(
-                      icon = "leaf",
-                      markerColor = "green",
-                      iconColor = "white",
-                      library = "fa"
-                    ),
-                    labelOptions = labelOptions(noHide = TRUE, textOnly = TRUE),
-                    label = lapply(donePlots$ID, HTML),
-                    clusterOptions = markerClusterOptions(removeOutsideVisibleBounds = FALSE),
-                    group = "Done Plots") %>% 
-  hideGroup("Bewirtschaftungseinheiten") #"MP3", "MP4", "MP5", "MP6", "MP7", "P2", "P3"
-)
+#(m <- leaflet(plots) %>%
+#    addTiles(urlTemplate = "https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg",
+#             attribution = '&copy; <a href="https://www.geo.admin.ch/de/about-swiss-geoportal/impressum.html#copyright">swisstopo</a>') %>% 
+#    
+#    # Add a button for each category in the priority variable
+#    addLayersControl(
+#      overlayGroups = c(unique(plots$priority), "Done Plots", "Bewirtschaftungseinheiten"), 
+#      options = layersControlOptions(collapsed = TRUE)
+#    ) %>%
+#    
+#    addCircleMarkers(data = plots, 
+#                     lat = ~Latitude, lng = ~Longitude,
+#                     popup = ~paste(ID, round(elevation, 0), sep = " - "),
+#                     radius = 8, stroke = FALSE, fillOpacity = 1, color = ~pal(priority),
+#                     group = ~priority) %>%
+#    
+#    addLegend(pal = pal, values = plots$priority,
+#              position = "bottomright", title = "Value") %>%
+#    addScaleBar(position = "bottomleft") %>%
+#    setView(lng = 9, lat = 46.4, zoom = 8) %>%
+#  addPolygons(data = poly, 
+#                fill = FALSE, 
+#                color = "darkorange", 
+#                opacity = 0.9,
+#                group = "Bewirtschaftungseinheiten") %>%
+#  addAwesomeMarkers(data = donePlots,
+#                    lat = ~Latitude, lng = ~Longitude,
+#                    icon = ~awesomeIcons(
+#                      icon = "leaf",
+#                      markerColor = "green",
+#                      iconColor = "white",
+#                      library = "fa"
+#                    ),
+#                    labelOptions = labelOptions(noHide = TRUE, textOnly = TRUE),
+#                    label = lapply(donePlots$ID, HTML),
+#                    clusterOptions = markerClusterOptions(removeOutsideVisibleBounds = FALSE),
+#                    group = "Done Plots") %>% 
+#  hideGroup("Bewirtschaftungseinheiten") #"MP3", "MP4", "MP5", "MP6", "MP7", "P2", "P3"
+#)
 
-
+# Filter the points with LU2020 column set to true
+BFF <- plots %>% filter(LU2020 == TRUE)
+non_BFF <- plots %>% filter(LU2020 == FALSE)
 
 (m <- leaflet(plots) %>%
     addTiles(urlTemplate = "https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg",
@@ -116,14 +121,19 @@ pal <- colorFactor(
              group = "Satellite View") %>%
     addLayersControl(
       baseGroups = c("Swiss Topographic Map", "Satellite View"),
-      overlayGroups = c(unique(plots$priority), "Done Plots", "Bewirtschaftungseinheiten"),
+      overlayGroups = c("BFF", "non_BFF", "Done Plots", "Bewirtschaftungseinheiten"),
       options = layersControlOptions(collapsed = TRUE)
     ) %>%
-    addCircleMarkers(data = plots, 
+    addCircleMarkers(data = BFF, 
                      lat = ~Latitude, lng = ~Longitude,
                      popup = ~paste(ID, round(elevation, 0), sep = " - "),
                      radius = 8, stroke = FALSE, fillOpacity = 1, color = ~pal(priority),
-                     group = ~priority) %>%
+                     group = "BFF") %>%
+    addCircleMarkers(data = non_BFF, 
+                     lat = ~Latitude, lng = ~Longitude,
+                     popup = ~paste(ID, round(elevation, 0), sep = " - "),
+                     radius = 8, stroke = FALSE, fillOpacity = 1, color = ~pal(priority),
+                     group = "non_BFF") %>%
     addLegend(pal = pal, values = plots$priority,
               position = "bottomright", title = "Value") %>%
     addScaleBar(position = "bottomleft") %>%
@@ -145,15 +155,72 @@ pal <- colorFactor(
                       label = lapply(donePlots$ID, HTML),
                       clusterOptions = markerClusterOptions(removeOutsideVisibleBounds = FALSE),
                       group = "Done Plots") %>% 
-    hideGroup(c("Bewirtschaftungseinheiten", "MP5", "MP6", "MP7", "P3"))
+    hideGroup(c("Bewirtschaftungseinheiten"))
 )
 
-
-
-
-
-
 htmlwidgets::saveWidget(m, file=paste("./2023-plot-map.html", sep = ""))
+
+
+##### SAVING AN IMAGE OF EVERY LOCATION
+
+# Cluster the points based on distance
+coords <- plots[, c("Longitude", "Latitude")]
+
+# Maximum distance in meters
+max_distance <- 4500
+
+# Helper function to convert coordinates to Cartesian coordinates in meters
+coord2cartesian <- function(coords) {
+  lat_rad <- coords$Latitude * pi / 180
+  x <- coords$Longitude * 6378137 * pi / 180
+  y <- log(tan((90 + coords$Latitude) * pi / 360)) * 6378137
+  return(data.frame(Longitude = x, Latitude = y))
+}
+
+# Convert coordinates to Cartesian coordinates in meters
+coords_cartesian <- coord2cartesian(coords)
+
+# Perform DBSCAN clustering
+db_clusters <- dbscan(coords_cartesian, eps = max_distance, minPts = 2); table(db_clusters$cluster)
+
+# Create the mini-map
+mini_map <- leaflet(options = leafletOptions(minZoom = 0, maxZoom = 13)) %>%
+  setView(lng = 8.2, lat = 46.8, zoom = 8)
+
+# Generate and save images for each cluster
+unique_clusters <- unique(db_clusters$cluster)
+
+for (i in unique_clusters) { #unique(db_clusters$cluster)
+  cluster_coords <- subset(coords, clusters$cluster == i)
+  
+  # Calculate bounding box
+  min_lng <- min(cluster_coords$Longitude)
+  max_lng <- max(cluster_coords$Longitude)
+  min_lat <- min(cluster_coords$Latitude)
+  max_lat <- max(cluster_coords$Latitude)
+  
+  # Calculate zoom level based on bounding box dimensions
+  lng_diff <- max_lng - min_lng
+  lat_diff <- max_lat - min_lat
+  zoom <- 14 #ifelse(min(18, floor(-log2(max(lng_diff, lat_diff)) + 8)) > 14, 14, min(18, floor(-log2(max(lng_diff, lat_diff)) + 8)))
+  
+  # Set view to bounding box
+  cluster_map <- m %>%
+    hideGroup("Done Plots") %>%
+    setView(lng = (min_lng + max_lng) / 2, lat = (min_lat + max_lat) / 2, zoom = zoom) %>%
+    addMiniMap(mini_map, width = 150, height = 100, position = "bottomleft", zoomLevelFixed = 6,
+               tiles = "https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg") %>%
+    addLabelOnlyMarkers(
+      data = plots,
+      lng = ~Longitude,
+      lat = ~Latitude,
+      label = ~as.character(ID),
+      labelOptions = labelOptions(noHide = T)
+    )
+  
+  #mapshot(cluster_map, file = paste0("./plot_maps/cluster_", i, ".png"), remove_controls = TRUE, delay = 2, vwidth = 1500, vheight = 1000)
+  
+}
 
 
 ###### CREATING THE MUNICIPALITY MAP ############################################
