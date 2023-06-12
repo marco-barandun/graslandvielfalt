@@ -31,8 +31,8 @@ donePlots <- read_csv("./2023-donePlots.csv") %>%
   filter(Done == 1)
 
 plots <- read_csv("./2023-joinedPlotSelection_v3.csv") %>%
-  filter(!priority %in% c("MP5", "MP6", "MP7", "P3")) %>%
-  filter(!ID %in% donePlots$ID)
+  filter(!priority %in% c("MP5", "MP6", "MP7")) #%>%
+  #filter(!ID %in% donePlots$ID)
 
 #be <- rgdal::readOGR("/Users/marco/kDocuments_Marco/PhD/server/1_original_data/shapefiles/be_bewirtschaftungseinheit_view.shp")
 
@@ -49,7 +49,7 @@ poly <- rgdal::readOGR("./2023-plots-with-be-poly.geojson")
 ### Create plot table #################################################################################################################
 ########################################################################################################################################
   
-(t <- DT::datatable(plots,
+(t <- DT::datatable(plots %>% filter(!ID %in% donePlots$ID),
                     class = "display nowrap",
                     escape = F,
                     rownames = FALSE))
@@ -161,13 +161,13 @@ non_BFF <- plots %>% filter(LU2020 == FALSE)
 htmlwidgets::saveWidget(m, file=paste("./2023-plot-map.html", sep = ""))
 
 
-##### SAVING AN IMAGE OF EVERY LOCATION
+###### SAVING AN IMAGE OF EVERY LOCATION ###### 
 
 # Cluster the points based on distance
 coords <- plots[, c("Longitude", "Latitude")]
 
 # Maximum distance in meters
-max_distance <- 4500
+max_distance <- 3800
 
 # Helper function to convert coordinates to Cartesian coordinates in meters
 coord2cartesian <- function(coords) {
@@ -188,10 +188,12 @@ mini_map <- leaflet(options = leafletOptions(minZoom = 0, maxZoom = 13)) %>%
   setView(lng = 8.2, lat = 46.8, zoom = 8)
 
 # Generate and save images for each cluster
+coords$cluster <- db_clusters$cluster
 unique_clusters <- unique(db_clusters$cluster)
 
 for (i in unique_clusters) { #unique(db_clusters$cluster)
-  cluster_coords <- subset(coords, clusters$cluster == i)
+  cluster_coords <- coords %>%
+    filter(cluster == i)
   
   # Calculate bounding box
   min_lng <- min(cluster_coords$Longitude)
@@ -218,7 +220,7 @@ for (i in unique_clusters) { #unique(db_clusters$cluster)
       labelOptions = labelOptions(noHide = T)
     )
   
-  #mapshot(cluster_map, file = paste0("./plot_maps/cluster_", i, ".png"), remove_controls = TRUE, delay = 2, vwidth = 1500, vheight = 1000)
+  mapshot(cluster_map, file = paste0("./plot_maps/cluster_", i, ".png"), remove_controls = TRUE, delay = 2, vwidth = 1500, vheight = 1000)
   
 }
 
