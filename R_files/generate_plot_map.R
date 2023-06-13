@@ -110,7 +110,7 @@ pal <- colorFactor(
 
 # Filter the points with LU2020 column set to true
 BFF <- plots %>% filter(LU2020 == TRUE)
-non_BFF <- plots %>% filter(LU2020 == FALSE)
+non_BFF <- plots %>% filter(LU2020 == FALSE | is.na(LU2020))
 
 (m <- leaflet(plots) %>%
     addTiles(urlTemplate = "https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg",
