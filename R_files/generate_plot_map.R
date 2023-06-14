@@ -31,8 +31,8 @@ donePlots <- read_csv("./2023-donePlots.csv") %>%
   filter(Done == 1)
 
 plots <- read_csv("./2023-joinedPlotSelection_v3.csv") %>%
-  filter(!priority %in% c("MP5", "MP6", "MP7")) #%>%
-  #filter(!ID %in% donePlots$ID)
+  filter(!priority %in% c("MP5", "MP6", "MP7")) %>%
+  mutate(link = paste0("http://www.google.ch/maps/place/", Latitude, ",", Longitude))
 
 #be <- rgdal::readOGR("/Users/marco/kDocuments_Marco/PhD/server/1_original_data/shapefiles/be_bewirtschaftungseinheit_view.shp")
 
@@ -49,7 +49,8 @@ poly <- rgdal::readOGR("./2023-plots-with-be-poly.geojson")
 ### Create plot table #################################################################################################################
 ########################################################################################################################################
   
-(t <- DT::datatable(plots %>% filter(!ID %in% donePlots$ID),
+(t <- DT::datatable(plots %>% filter(!ID %in% donePlots$ID) %>%
+                      mutate(ID = paste0('<a target="_parent" href=', .$link, '>', .$ID, ' </a>', sep = "")),
                     class = "display nowrap",
                     escape = F,
                     rownames = FALSE))
