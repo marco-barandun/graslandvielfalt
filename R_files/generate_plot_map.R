@@ -1,4 +1,5 @@
 library(leaflet)
+library(leaflet.extras)
 library(DT)
 library(scales)
 library(tidyverse)
@@ -50,7 +51,8 @@ poly <- rgdal::readOGR("./2023-plots-with-be-poly.geojson")
 ########################################################################################################################################
   
 (t <- DT::datatable(plots %>% filter(!ID %in% donePlots$ID) %>%
-                      mutate(ID = paste0('<a target="_parent" href=', .$link, '>', .$ID, ' </a>', sep = "")),
+                      mutate(ID = paste0('<a target="_parent" href=', .$link, '>', .$ID, ' </a>', sep = "")) %>%
+                      select(-Latitude, -Longitude, -link, -P.Test.CO2., -Nutzungsid),
                     class = "display nowrap",
                     escape = F,
                     rownames = FALSE))
@@ -120,11 +122,6 @@ non_BFF <- plots %>% filter(LU2020 == FALSE | is.na(LU2020))
     addTiles(urlTemplate = "https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.swissimage/default/current/3857/{z}/{x}/{y}.jpeg",
              attribution = '&copy; <a href="https://www.geo.admin.ch/de/about-swiss-geoportal/impressum.html#copyright">swisstopo</a>',
              group = "Satellite View") %>%
-    addLayersControl(
-      baseGroups = c("Swiss Topographic Map", "Satellite View"),
-      overlayGroups = c("BFF", "non_BFF", "Done Plots", "Bewirtschaftungseinheiten"),
-      options = layersControlOptions(collapsed = TRUE)
-    ) %>%
     addCircleMarkers(data = BFF, 
                      lat = ~Latitude, lng = ~Longitude,
                      popup = ~paste(ID, round(elevation, 0), sep = " - "),
@@ -156,8 +153,23 @@ non_BFF <- plots %>% filter(LU2020 == FALSE | is.na(LU2020))
                       label = lapply(donePlots$ID, HTML),
                       clusterOptions = markerClusterOptions(removeOutsideVisibleBounds = FALSE),
                       group = "Done Plots") %>% 
-    hideGroup(c("Bewirtschaftungseinheiten"))
+    addWMSTiles(
+      baseUrl = "https://wms.geo.admin.ch/",
+      layers = "ch.bav.haltestellen-oev",
+      group = "Public Transport Stops",
+      options = WMSTileOptions(format = "image/png", transparent = TRUE)
+    ) %>%
+    addLayersControl(
+      baseGroups = c("Swiss Topographic Map", "Satellite View"),
+      overlayGroups = c("BFF", "non_BFF", "Done Plots", "Bewirtschaftungseinheiten", "Public Transport Stops"),
+      options = layersControlOptions(collapsed = TRUE)
+    ) %>%
+    hideGroup(c("Bewirtschaftungseinheiten", "Public Transport Stops"))
+    
 )
+
+# Add fullscreen button
+m <- addFullscreenControl(m)
 
 htmlwidgets::saveWidget(m, file=paste("./2023-plot-map.html", sep = ""))
 
