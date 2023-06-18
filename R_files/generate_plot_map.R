@@ -168,10 +168,17 @@ non_BFF <- plots %>% filter(LU2020 == FALSE | is.na(LU2020))
     
 )
 
-# Add fullscreen button
 m <- addFullscreenControl(m)
 
-htmlwidgets::saveWidget(m, file=paste("./2023-plot-map.html", sep = ""))
+map <- addControlGPS(m, options = gpsOptions(position = "topleft", activate = TRUE, 
+                                               autoCenter = TRUE, maxZoom = 10, 
+                                               setView = TRUE))
+activateGPS(map)
+
+
+# Add fullscreen button
+
+htmlwidgets::saveWidget(map, file=paste("./2023-plot-map.html", sep = ""))
 
 
 ###### SAVING AN IMAGE OF EVERY LOCATION ###### 
