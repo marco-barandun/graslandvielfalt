@@ -170,26 +170,11 @@ non_BFF <- plots %>% filter(LU2020 == FALSE | is.na(LU2020))
 
 m <- addFullscreenControl(m)
 
-# Add the GPS control to the map
-map <- addControlGPS(m, options = gpsOptions(
-  position = "topleft",
-  activate = TRUE,
-  autoCenter = TRUE,
-  maxZoom = 10,
-  setView = TRUE
-))
-
-# Activate the GPS control
+map <- addControlGPS(m, options = gpsOptions(position = "topleft", activate = TRUE, 
+                                               autoCenter = TRUE, maxZoom = 10, 
+                                               setView = TRUE))
 activateGPS(map)
 
-# Customizing the current position icon
-customIcon <- makeIcon(
-  iconUrl = "./icons/my_position.png",
-  iconWidth = 32,
-  iconHeight = 32
-)
-
-map$gpsOptions$currentIcon <- customIcon
 
 # Add fullscreen button
 
