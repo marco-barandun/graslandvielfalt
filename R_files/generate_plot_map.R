@@ -56,15 +56,6 @@ poly <- rgdal::readOGR("./2023-plots-with-be-poly.geojson")
 ### Create plot table #################################################################################################################
 ########################################################################################################################################
   
-(t <- DT::datatable(plots %>% filter(!ID %in% gsheet$ID) %>%
-                      mutate(ID = paste0('<a target="_parent" href=', .$link, '>', .$ID, ' </a>', sep = "")) %>%
-                      select(-Latitude, -Longitude, -link, -P.Test.CO2., -Nutzungsid),
-                    class = "display nowrap",
-                    escape = F,
-                    rownames = FALSE))
-
-htmltools::save_html(t, file="2023-plot-table.html")
-
 (t <- DT::datatable(plots %>% 
                       mutate(ID = paste0('<a target="_parent" href=', .$link, '>', .$ID, ' </a>', sep = "")) %>%
                       select(-Latitude, -Longitude, -link, -P.Test.CO2., -Nutzungsid),
@@ -73,6 +64,15 @@ htmltools::save_html(t, file="2023-plot-table.html")
                     rownames = FALSE))
 
 htmltools::save_html(t, file="2023-plot-table-andrea.html")
+
+(t <- DT::datatable(plots %>% filter(!ID %in% gsheet$ID) %>%
+                      mutate(ID = paste0('<a target="_parent" href=', .$link, '>', .$ID, ' </a>', sep = "")) %>%
+                      select(-Latitude, -Longitude, -link, -P.Test.CO2., -Nutzungsid),
+                    class = "display nowrap",
+                    escape = F,
+                    rownames = FALSE))
+
+htmltools::save_html(t, file="2023-plot-table.html")
 
 
 ########################################################################################################################################
@@ -194,21 +194,38 @@ NON_BFF <- plots %>% filter(LU2020 == FALSE | is.na(LU2020))%>% filter(!ID %in% 
       overlayGroups = c("DONE_BFF", "DONE_NON_BFF", "BFF", "NON_BFF", "Done Plots", "Bewirtschaftungseinheiten", "Public Transport Stops"),
       options = layersControlOptions(collapsed = TRUE)
     ) %>%
-    hideGroup(c("DONE_BFF", "DONE_NON_BFF", "Bewirtschaftungseinheiten", "Public Transport Stops", "Done Plots"))
-    
+    hideGroup(c("DONE_BFF", "DONE_NON_BFF", "Bewirtschaftungseinheiten", "Public Transport Stops", "Done Plots")) %>%
+    addFullscreenControl() %>%
+    addEasyButton(
+      easyButton(
+        icon = "fa-crosshairs",
+        title = "Locate Me",
+        onClick = JS(
+          "function(btn, map) {
+          map.locate({setView: true, enableHighAccuracy: true});
+          
+          map.on('locationfound', function(e) {
+            var lat = e.latlng.lat;
+            var lng = e.latlng.lng;
+            
+            var customIcon = L.icon({
+              iconUrl: './icons/my_position.png',
+              iconSize: [52, 52],
+              iconAnchor: [16, 32]
+            });
+            
+            L.marker([lat, lng], { icon: customIcon }).addTo(map);
+          });
+        }"
+        )
+      )
+    )
 )
-
-m <- addFullscreenControl(m)
-
-map <- addControlGPS(m, options = gpsOptions(position = "topleft", activate = TRUE, 
-                                               autoCenter = TRUE, maxZoom = 10, 
-                                               setView = TRUE))
-activateGPS(map)
 
 
 # Add fullscreen button
 
-htmlwidgets::saveWidget(map, file=paste("./2023-plot-map.html", sep = ""))
+htmlwidgets::saveWidget(m, file=paste("./2023-plot-map.html", sep = ""))
 
 
 ###### SAVING AN IMAGE OF EVERY LOCATION ###### 
