@@ -5,6 +5,7 @@ library(scales)
 library(tidyverse)
 library(sf)
 library(htmltools)
+library(googlesheets4)
 
 setwd("/Users/marco/GitHub/graslandvielfalt/R_files")
 source("./config_plot_map.R")
@@ -31,6 +32,11 @@ source("./config_plot_map.R")
 donePlots <- read_csv("./2023-donePlots.csv") %>%
   filter(Done == 1)
 
+# Read the data from the Google Sheet
+gsheet <- read_sheet("https://docs.google.com/spreadsheets/d/1rIDiZIn6EFSC1ifOlfHDeNpUIWRYYqZDQa5PPJdeaog/edit#gid=123") %>%
+  select(1:15) %>%
+  filter(Done == 1)
+
 plots <- read_csv("./2023-joinedPlotSelection_v3.csv") %>%
   filter(!priority %in% c("MP5", "MP6", "MP7")) %>%
   mutate(link = paste0("http://www.google.ch/maps/place/", Latitude, ",", Longitude))
@@ -50,7 +56,7 @@ poly <- rgdal::readOGR("./2023-plots-with-be-poly.geojson")
 ### Create plot table #################################################################################################################
 ########################################################################################################################################
   
-(t <- DT::datatable(plots %>% filter(!ID %in% donePlots$ID) %>%
+(t <- DT::datatable(plots %>% filter(!ID %in% gsheet$ID) %>%
                       mutate(ID = paste0('<a target="_parent" href=', .$link, '>', .$ID, ' </a>', sep = "")) %>%
                       select(-Latitude, -Longitude, -link, -P.Test.CO2., -Nutzungsid),
                     class = "display nowrap",
@@ -58,6 +64,15 @@ poly <- rgdal::readOGR("./2023-plots-with-be-poly.geojson")
                     rownames = FALSE))
 
 htmltools::save_html(t, file="2023-plot-table.html")
+
+(t <- DT::datatable(plots %>% 
+                      mutate(ID = paste0('<a target="_parent" href=', .$link, '>', .$ID, ' </a>', sep = "")) %>%
+                      select(-Latitude, -Longitude, -link, -P.Test.CO2., -Nutzungsid),
+                    class = "display nowrap",
+                    escape = F,
+                    rownames = FALSE))
+
+htmltools::save_html(t, file="2023-plot-table-andrea.html")
 
 
 ########################################################################################################################################
@@ -112,8 +127,10 @@ pal <- colorFactor(
 #)
 
 # Filter the points with LU2020 column set to true
-BFF <- plots %>% filter(LU2020 == TRUE)
-non_BFF <- plots %>% filter(LU2020 == FALSE | is.na(LU2020))
+DONE_BFF <- plots %>% filter(LU2020 == TRUE) %>% filter(ID %in% gsheet$ID)
+DONE_NON_BFF <- plots %>% filter(LU2020 == FALSE | is.na(LU2020))%>% filter(ID %in% gsheet$ID)
+BFF <- plots %>% filter(LU2020 == TRUE) %>% filter(!ID %in% gsheet$ID)
+NON_BFF <- plots %>% filter(LU2020 == FALSE | is.na(LU2020))%>% filter(!ID %in% gsheet$ID)
 
 (m <- leaflet(plots) %>%
     addTiles(urlTemplate = "https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg",
@@ -122,16 +139,29 @@ non_BFF <- plots %>% filter(LU2020 == FALSE | is.na(LU2020))
     addTiles(urlTemplate = "https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.swissimage/default/current/3857/{z}/{x}/{y}.jpeg",
              attribution = '&copy; <a href="https://www.geo.admin.ch/de/about-swiss-geoportal/impressum.html#copyright">swisstopo</a>',
              group = "Satellite View") %>%
+    
+    addCircleMarkers(data = DONE_BFF, 
+                     lat = ~Latitude, lng = ~Longitude,
+                     popup = ~paste(ID, round(elevation, 0), sep = " - "),
+                     radius = 8, stroke = FALSE, fillOpacity = 1, color = ~pal(priority),
+                     group = "DONE_BFF") %>%
+    addCircleMarkers(data = DONE_NON_BFF, 
+                     lat = ~Latitude, lng = ~Longitude,
+                     popup = ~paste(ID, round(elevation, 0), sep = " - "),
+                     radius = 8, stroke = FALSE, fillOpacity = 1, color = ~pal(priority),
+                     group = "DONE_NON_BFF") %>%
+    
     addCircleMarkers(data = BFF, 
                      lat = ~Latitude, lng = ~Longitude,
                      popup = ~paste(ID, round(elevation, 0), sep = " - "),
                      radius = 8, stroke = FALSE, fillOpacity = 1, color = ~pal(priority),
                      group = "BFF") %>%
-    addCircleMarkers(data = non_BFF, 
+    addCircleMarkers(data = NON_BFF, 
                      lat = ~Latitude, lng = ~Longitude,
                      popup = ~paste(ID, round(elevation, 0), sep = " - "),
                      radius = 8, stroke = FALSE, fillOpacity = 1, color = ~pal(priority),
-                     group = "non_BFF") %>%
+                     group = "NON_BFF") %>%
+    
     addLegend(pal = pal, values = plots$priority,
               position = "bottomright", title = "Value") %>%
     addScaleBar(position = "bottomleft") %>%
@@ -141,7 +171,7 @@ non_BFF <- plots %>% filter(LU2020 == FALSE | is.na(LU2020))
                 color = "darkorange", 
                 opacity = 0.9,
                 group = "Bewirtschaftungseinheiten") %>%
-    addAwesomeMarkers(data = donePlots,
+    addAwesomeMarkers(data = gsheet,
                       lat = ~Latitude, lng = ~Longitude,
                       icon = ~awesomeIcons(
                         icon = "leaf",
@@ -150,7 +180,7 @@ non_BFF <- plots %>% filter(LU2020 == FALSE | is.na(LU2020))
                         library = "fa"
                       ),
                       labelOptions = labelOptions(noHide = TRUE, textOnly = TRUE),
-                      label = lapply(donePlots$ID, HTML),
+                      label = lapply(gsheet$ID, HTML),
                       clusterOptions = markerClusterOptions(removeOutsideVisibleBounds = FALSE),
                       group = "Done Plots") %>% 
     addWMSTiles(
@@ -161,10 +191,10 @@ non_BFF <- plots %>% filter(LU2020 == FALSE | is.na(LU2020))
     ) %>%
     addLayersControl(
       baseGroups = c("Swiss Topographic Map", "Satellite View"),
-      overlayGroups = c("BFF", "non_BFF", "Done Plots", "Bewirtschaftungseinheiten", "Public Transport Stops"),
+      overlayGroups = c("DONE_BFF", "DONE_NON_BFF", "BFF", "NON_BFF", "Done Plots", "Bewirtschaftungseinheiten", "Public Transport Stops"),
       options = layersControlOptions(collapsed = TRUE)
     ) %>%
-    hideGroup(c("Bewirtschaftungseinheiten", "Public Transport Stops"))
+    hideGroup(c("DONE_BFF", "DONE_NON_BFF", "Bewirtschaftungseinheiten", "Public Transport Stops", "Done Plots"))
     
 )
 
