@@ -34,8 +34,8 @@ donePlots <- read_csv("./2023-donePlots.csv") %>%
 
 # Read the data from the Google Sheet
 gsheet <- read_sheet("https://docs.google.com/spreadsheets/d/1rIDiZIn6EFSC1ifOlfHDeNpUIWRYYqZDQa5PPJdeaog/edit#gid=123") %>%
-  select(1:15) %>%
-  filter(Done == 1)
+  #select(1:15) %>%
+  filter(done_veg == 1)
 
 plots <- read_csv("./2023-joinedPlotSelection_v3.csv") %>%
   filter(!priority %in% c("MP5", "MP6", "MP7")) %>%
