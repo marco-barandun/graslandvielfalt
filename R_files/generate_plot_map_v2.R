@@ -6,6 +6,8 @@ library(tidyverse)
 library(sf)
 library(htmltools)
 library(googlesheets4)
+library(mapview)
+library(sp)
 
 setwd("/Users/marco/GitHub/graslandvielfalt/R_files")
 source("./config_plot_map.R")
@@ -41,7 +43,20 @@ gsheet <- read_sheet("https://docs.google.com/spreadsheets/d/1rIDiZIn6EFSC1ifOlf
 plots <- read_csv("./2023-joinedPlotSelection_v3.csv") %>%
   filter(!priority %in% c("MP5", "MP6", "MP7")) %>%
   mutate(link = paste0("http://www.google.ch/maps/place/", Latitude, ",", Longitude)) %>%
-  left_join(gsheet %>% select("ID", "date_veg", "coord_inprec"), by = "ID")
+  left_join(gsheet %>% select("ID", "date_veg", "coord_inprec", "moss"), by = "ID") %>%
+  mutate(sID = sub("^[^-]*-", "", ID))
+
+#gps <- read_tsv("./gps/2023-05-23-1116-bkp2.txt") %>% as.data.frame()
+#write_csv(gps, "./gps/2023-05-23-1116-bkp2-to-clean.csv")
+gps <- read_csv("./gps/gps-clean.csv") %>%
+  mutate(sID = toupper(ifelse(nchar(Punkt_ID_G4B) <= 6,
+                                       gsub("^(.{2})(.{2})", "\\1-\\2-", Punkt_ID_G4B),
+                             sub("^[^-]*-", "", Punkt_ID_G4B)))) %>%
+  select(-ID) %>%
+  left_join(plots, by = "sID")
+
+plots <- plots %>%
+  left_join(gps %>% select(sID, Korrtyp), by = "sID")
 
 #be <- rgdal::readOGR("/Users/marco/kDocuments_Marco/PhD/server/1_original_data/shapefiles/be_bewirtschaftungseinheit_view.shp")
 
@@ -60,7 +75,7 @@ poly <- rgdal::readOGR("./2023-plots-with-be-poly.geojson")
   
 (t <- DT::datatable(plots %>% 
                       mutate(ID = paste0('<a target="_parent" href=', .$link, '>', .$ID, ' </a>', sep = "")) %>%
-                      select(-Latitude, -Longitude, -link, -P.Test.CO2., -Nutzungsid),
+                      select(-Latitude, -Longitude, -link, -P.Test.CO2., -Nutzungsid, -coord_inprec),
                     class = "display nowrap",
                     escape = F,
                     rownames = FALSE))
@@ -69,7 +84,7 @@ htmltools::save_html(t, file="2023-plot-table-andrea.html")
 
 (t <- DT::datatable(plots %>% filter(!ID %in% gsheet$ID) %>%
                       mutate(ID = paste0('<a target="_parent" href=', .$link, '>', .$ID, ' </a>', sep = "")) %>%
-                      select(-Latitude, -Longitude, -link, -P.Test.CO2., -Nutzungsid),
+                      select(-Latitude, -Longitude, -link, -P.Test.CO2., -Nutzungsid, -coord_inprec),
                     class = "display nowrap",
                     escape = F,
                     rownames = FALSE))
@@ -148,19 +163,53 @@ NON_BFF <- plots %>% filter(LU2020 == FALSE | is.na(LU2020))%>% filter(!ID %in% 
                                     "<br>Elevation: ", round(as.numeric(elevation), 0), 
                                     "<br>Date veg: ", date_veg,
                                     "<br>",
+                                    "<br><b>Korrtyp:</b> ", Korrtyp, 
                                     "<br><b>Slope:</b> ", round(as.numeric(slope), 0), 
-                                    "<br><b>Precise coords:</b> ", coord_inprec,
-                                    "<br><b>Moss collected:</b> ", coord_inprec,
+                                    "<br><b>Moss collected:</b> ", moss,
+                                    
+                                    sep = ""),
+                     radius = 8, stroke = FALSE, fillOpacity = 1, color = ~pal(priority),
+                     group = "DONE_BFF") %>%
+    
+    addCircleMarkers(data = DONE_NON_BFF, 
+                     lat = ~Latitude, lng = ~Longitude,
+                     popup = ~paste(paste0('<a target=\"_parent\" href=', link, '>', ID, ' </a>', sep = ""), 
+                                    "<br>Elevation: ", round(as.numeric(elevation), 0), 
+                                    "<br>Date veg: ", date_veg,
+                                    "<br>",
+                                    "<br><b>Korrtyp:</b> ", Korrtyp, 
+                                    "<br><b>Slope:</b> ", round(as.numeric(slope), 0), 
+                                    "<br><b>Moss collected:</b> ", moss,
+                                    
+                                    sep = ""),
+                     radius = 8, stroke = FALSE, fillOpacity = 1, color = ~pal(priority),
+                     group = "DONE_NON_BFF") %>%
+    
+    addCircleMarkers(data = BFF, 
+                     lat = ~Latitude, lng = ~Longitude,
+                     popup = ~paste(paste0('<a target=\"_parent\" href=', link, '>', ID, ' </a>', sep = ""), 
+                                    "<br>Elevation: ", round(as.numeric(elevation), 0), 
+                                    "<br>Date veg: ", date_veg,
+                                    "<br>",
+                                    "<br><b>Korrtyp:</b> ", Korrtyp, 
+                                    "<br><b>Slope:</b> ", round(as.numeric(slope), 0), 
+                                    "<br><b>Moss collected:</b> ", moss,
                                     
                                     sep = ""),
                      radius = 8, stroke = FALSE, fillOpacity = 1, color = ~pal(priority),
                      group = "BFF") %>%
     
-    
-    
     addCircleMarkers(data = NON_BFF, 
                      lat = ~Latitude, lng = ~Longitude,
-                     popup = ~paste(ID, round(elevation, 0), sep = " - "),
+                     popup = ~paste(paste0('<a target=\"_parent\" href=', link, '>', ID, ' </a>', sep = ""), 
+                                    "<br>Elevation: ", round(as.numeric(elevation), 0), 
+                                    "<br>Date veg: ", date_veg,
+                                    "<br>",
+                                    "<br><b>Korrtyp:</b> ", Korrtyp, 
+                                    "<br><b>Slope:</b> ", round(as.numeric(slope), 0), 
+                                    "<br><b>Moss collected:</b> ", moss,
+                                    
+                                    sep = ""),
                      radius = 8, stroke = FALSE, fillOpacity = 1, color = ~pal(priority),
                      group = "NON_BFF") %>%
     
@@ -173,18 +222,18 @@ NON_BFF <- plots %>% filter(LU2020 == FALSE | is.na(LU2020))%>% filter(!ID %in% 
                 color = "darkorange", 
                 opacity = 0.9,
                 group = "Bewirtschaftungseinheiten") %>%
-    addAwesomeMarkers(data = gsheet,
-                      lat = ~Latitude, lng = ~Longitude,
-                      icon = ~awesomeIcons(
-                        icon = "leaf",
-                        markerColor = "green",
-                        iconColor = "white",
-                        library = "fa"
-                      ),
-                      labelOptions = labelOptions(noHide = TRUE, textOnly = TRUE),
-                      label = lapply(gsheet$ID, HTML),
-                      clusterOptions = markerClusterOptions(removeOutsideVisibleBounds = FALSE),
-                      group = "Done Plots") %>% 
+    #addAwesomeMarkers(data = gsheet,
+    #                  lat = ~Latitude, lng = ~Longitude,
+    #                  icon = ~awesomeIcons(
+    #                    icon = "leaf",
+    #                    markerColor = "green",
+    #                    iconColor = "white",
+    #                    library = "fa"
+    #                  ),
+    #                  labelOptions = labelOptions(noHide = TRUE, textOnly = TRUE),
+    #                  label = lapply(gsheet$ID, HTML),
+    #                  clusterOptions = markerClusterOptions(removeOutsideVisibleBounds = FALSE),
+    #                  group = "Done Plots") %>% 
     addWMSTiles(
       baseUrl = "https://wms.geo.admin.ch/",
       layers = "ch.bav.haltestellen-oev",
