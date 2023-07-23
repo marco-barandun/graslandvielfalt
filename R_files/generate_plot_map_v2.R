@@ -48,7 +48,7 @@ plots <- read_csv("./2023-joinedPlotSelection_v3.csv") %>%
 
 #gps <- read_tsv("./gps/2023-05-23-1116-bkp2.txt") %>% as.data.frame()
 #write_csv(gps, "./gps/2023-05-23-1116-bkp2-to-clean.csv")
-gps <- read_csv("./gps/gps-clean.csv") %>%
+gps <- read_csv("./gps/2023-05-23-1116-bkp2-clean_v3.csv") %>%
   mutate(sID = toupper(ifelse(nchar(Punkt_ID_G4B) <= 6,
                                        gsub("^(.{2})(.{2})", "\\1-\\2-", Punkt_ID_G4B),
                              sub("^[^-]*-", "", Punkt_ID_G4B)))) %>%
