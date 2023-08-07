@@ -5,13 +5,17 @@ library(mapview)
 library(sp)
 library(rgdal)
 library(data.table)
+library(DT)
 
 setwd("/Users/marco/GitHub/graslandvielfalt/R_files/")
 source("/Users/marco/GitHub/GitHub_G4B/2023_re-survey/3_scripts/config_1_readVegedaz_marco.R")
 
-plots <- read_csv("./2023-joinedPlotSelection_v3.csv") %>% filter(!priority %in% c("MP5", "MP6", "MP7"))
+plots <- read_csv("/Users/marco/GitHub/graslandvielfalt/R_files/2023-joinedPlotSelection_v3.csv") %>% 
+  filter(!priority %in% c("MP5", "MP6", "MP7"))
 
 dorothea_orth <- readVegedaz("/Users/marco/GitHub/GitHub_G4B/2023_re-survey/1_original_data/Data_Dorothea_Kampmann/NFP48_C_Heuschreckenaufnahmen.tab")
+hohl_orth <- read_csv("/Users/marco/GitHub/graslandvielfalt/R_files/hohl_grashopperAbundance.csv")
+
 
 orths <- as.data.frame(dorothea_orth$xtab) %>%
   rownames_to_column(var = "rn") %>%
@@ -31,8 +35,14 @@ orths <- as.data.frame(dorothea_orth$xtab) %>%
   as.data.frame() %>%
   setNames(.[1, ]) %>%
   slice(-1) %>%
-  as.data.frame()
-
+  as.data.frame() %>%
+  rownames_to_column(var = "Species") %>%
+  bind_rows(hohl_orth) %>%
+  mutate_at(vars(-Species), as.numeric) %>%
+  group_by(Species) %>%
+  summarise(across(everything(), sum, na.rm = TRUE)) %>%
+  ungroup()
+  
 
 # Create the species table
 (t <- datatable(
@@ -43,7 +53,7 @@ orths <- as.data.frame(dorothea_orth$xtab) %>%
   options = list(
     dom = "lfrtip",
     lengthMenu = list(c(10, 25, 50, -1), c("10", "25", "50", "All")),
-    pageLength = 25,
+    pageLength = 40,
     initComplete = JS(
       "function(settings, json) {",
       "  var table = settings.oInstance.api();",

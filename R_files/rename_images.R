@@ -10,10 +10,10 @@ library(geosphere)
 library(exifr)
 
 # Read the CSV file with coordinates and IDs
-#data <- read.csv("coordinates.csv")
+data <- read.csv("/Users/marco/GitHub/graslandvielfalt/R_files/2023-joinedPlotSelection_v3.csv")
 
 # Directory containing the pictures
-pictureDirectory <- "/Volumes/8TB/drone/G4B/work"
+pictureDirectory <- "/Users/marco/Desktop/drone_import"
 
 # Function to calculate distance between two coordinates
 calculateDistance <- function(lat1, lon1, lat2, lon2) {
@@ -79,13 +79,12 @@ for (groupID in names(groupedFiles)) {
   }))]
   
   # Rename the group files
-  # Rename the group files
   for (i in seq_along(groupFiles)) {
     file <- groupFiles[i]
     filename <- sub("^(.*)-.*$", "\\1", basename(file))
     extension <- tools::file_ext(file)
     indicator <- ifelse(file == highestElevationFile, "-H", "-L")
-    newFilename <- paste0(filename, indicator, "-", i)
+    newFilename <- paste0(sub("^(.*?-.*?-.*?-.*?)-.*$", "\\1", filename), indicator, "-", i)
     newFilepath <- file.path(pictureDirectory, paste0(newFilename, ".", extension))
     file.rename(file, newFilepath)
     cat("Renamed", basename(file), "to", basename(newFilepath), "\n")
@@ -97,6 +96,7 @@ for (groupID in names(groupedFiles)) {
 # Preallocate the idDateData data frame
 max_files <- length(pictureFiles)
 idDateData <- data.frame(ID = character(max_files), Date = character(max_files), stringsAsFactors = FALSE)
+pictureFiles <- list.files(pictureDirectory, pattern = "*\\.(dng|jpg)$", ignore.case = TRUE, full.names = TRUE)
 
 # Process each file using lapply
 idDateData <- do.call(rbind, lapply(pictureFiles, function(file) {
@@ -118,8 +118,10 @@ idDateData <- do.call(rbind, lapply(pictureFiles, function(file) {
 # Remove duplicate entries
 idDateData <- unique(idDateData)
 
-# Write the ID and date data to a CSV file
-write.csv(idDateData, "plots_wDronePic.csv", row.names = FALSE)
+# Append the data to the existing CSV file
+write.table(idDateData, "/Users/marco/GitHub/graslandvielfalt/R_files/drone/plots_wDronePic.csv",
+            sep = ",", col.names = !file.exists("/Users/marco/GitHub/graslandvielfalt/R_files/drone/plots_wDronePic.csv"),
+            row.names = FALSE, append = TRUE)
 
 # Print the data frame
 print(idDateData)
