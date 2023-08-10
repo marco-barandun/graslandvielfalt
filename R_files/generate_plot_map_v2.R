@@ -3,7 +3,6 @@ library(leaflet.extras)
 library(DT)
 library(scales)
 library(tidyverse)
-library(sf)
 library(htmltools)
 library(googlesheets4)
 library(mapview)
@@ -42,7 +41,7 @@ gsheet <- read_sheet("https://docs.google.com/spreadsheets/d/1rIDiZIn6EFSC1ifOlf
 plots <- read_csv("./2023-joinedPlotSelection_v3.csv") %>%
   filter(!priority %in% c("MP5", "MP6", "MP7")) %>%
   mutate(link = paste0("http://www.google.ch/maps/place/", Latitude, ",", Longitude)) %>%
-  inner_join(gsheet %>% dplyr::select("ID", "date_veg", "coord_inprec", "moss"), by = "ID") %>%
+  inner_join(gsheet %>% dplyr::select("ID", "date_veg", "date_orth_1", "date_orth_2", "coord_inprec", "moss"), by = "ID") %>%
   mutate(sID = gsub("-", "", sub("^[^-]*-", "", ID, ignore.case = TRUE)))
 
 tobia <- read_csv("./tobia-non-grassland-plots.csv") %>%
@@ -97,11 +96,9 @@ plots <- plots %>%
 #poly <- be %>%
 #  get_polygons(plots = plots, shapefile = ., radius_m = 200)
 #
-#writeOGR(poly, dsn = "./2023-plots-with-be-poly-wTobia.geojson", 
-#         layer = ogrListLayers("/Users/marco/kDocuments_Marco/PhD/server/1_original_data/shapefiles/be_bewirtschaftungseinheit_view.shp")[1],
-#         driver = "GeoJSON")
+#st_write(st_as_sf(poly), "./2023-plots-with-be-poly-wTobia.geojson", driver = "GeoJSON")
 
-poly <- rgdal::readOGR("./2023-plots-with-be-poly-wTobia.geojson")
+poly <- st_as_sf(st_read("./2023-plots-with-be-poly-wTobia.geojson"))
 
 ########################################################################################################################################
 ### Create plot table #################################################################################################################
@@ -201,6 +198,8 @@ Marco <- plots %>% filter(priority == "MP1" | priority == "MP2" | priority == "M
                      popup = ~paste(paste0('<a target=\"_parent\" href=', link, '>', ID, ' </a>', sep = ""), 
                                     "<br>Elevation: ", round(as.numeric(elevation), 0), 
                                     "<br>Date veg: ", date_veg,
+                                    "<br>Date orth 1: ", date_orth_1,
+                                    "<br>Date orth 2: ", date_orth_2,
                                     "<br>",
                                     "<br><b>LU2020:</b> ", LU2020, 
                                     "<br><b>Korrtyp:</b> ", Korrtyp, 
@@ -216,6 +215,8 @@ Marco <- plots %>% filter(priority == "MP1" | priority == "MP2" | priority == "M
                      popup = ~paste(paste0('<a target=\"_parent\" href=', link, '>', ID, ' </a>', sep = ""), 
                                     "<br>Elevation: ", round(as.numeric(elevation), 0), 
                                     "<br>Date veg: ", date_veg,
+                                    "<br>Date orth 1: ", date_orth_1,
+                                    "<br>Date orth 2: ", date_orth_2,
                                     "<br>",
                                     "<br><b>LU2020:</b> ", LU2020, 
                                     "<br><b>Korrtyp:</b> ", Korrtyp, 
