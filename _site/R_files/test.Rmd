@@ -1,0 +1,24 @@
+Loading libraries
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+library(leaflet)
+library(leaflet.extras)
+library(DT)
+library(scales)
+library(tidyverse)
+library(sf)
+library(htmltools)
+library(googlesheets4)
+library(mapview)
+library(sp)
+library(rgdal)
+library(data.table)  # Load data.table package
+library(terra)
+library(sf)
+library(dplyr)
+```
+
+```{r}
+mapview(p)
+```
+

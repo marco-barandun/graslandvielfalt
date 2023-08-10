@@ -1,0 +1,55 @@
+This documents highlights the process of selecting the non-grassland plots for Tobia's MSc thesis.
+
+First we want to load the necessary libraries, set the working directory, etc.
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+# Loading the necessary libraries
+library(tidyverse)
+
+# Setting the working directory
+setwd("/Users/marco/GitHub/graslandvielfalt/R_files")
+```
+
+Now that we have setup the environment we will be working in, let's load in some datasets.
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+# Here are the LNF codes
+lnf_codes_used <- c(
+  611, # Dauergrünflächen – Dauerwiesen	Extensiv genutzte Wiesen (ohne Weiden)	BFF
+  612, # Dauergrünflächen – Dauerwiesen	Wenig intensiv genutzte Wiesen (ohne Weiden)	BFF
+  613, # Dauergrünflächen – Dauerwiesen	Übrige Dauerwiesen (ohne Weiden)
+  616, # Dauergrünflächen – Dauerweiden	Weiden (Heimweiden, übrige Weiden ohne Sömmerungsweide)
+  617, # Dauergrünflächen – Dauerweiden	Extensiv genutzte Weiden	BFF
+  694 # Dauergrünflächen – Dauerwiesen	Regionsspezifische Biodiversitätsförderflächen(Grünflächen ohne Weiden)	BFF
+  )
+
+lnf_codes_all <- c(
+  512, 545, 601, 611, 612, 613, 616, 617, 622, 694, 851, 857, 902, 930
+)
+
+# Loading the LWB dataset
+lwb <- read_csv("/Users/marco/GitHub/GitHub_G4B/2023_re-survey/1_original_data/Table_Intersect_LWB.txt") %>%
+  filter(Groesse > 0) %>%
+  select(-rn, -elevation, -date, -editor, -slope, -exposition, -year, -taxon, -origin) 
+
+# load and filter pri dataset (Arealstatistik)
+pri <- read_csv("/Users/marco/GitHub/GitHub_G4B/2023_re-survey/1_original_data/Table_Intersect_PRI.txt") %>%
+  select(-rn, -elevation, -date, -editor, -slope, -exposition, -year, -taxon, -origin)
+
+
+# Selecting the information for the various coordinates - ID and rn are not used here as issues in the kph dataset
+kph <- read_csv("/Users/marco/GitHub/GitHub_G4B/2023_re-survey/2_generated_data/old/Coord_Kamp_Peter_Hohl.csv") %>%
+  select(x_coord, y_coord, ID) %>%
+  inner_join(., lwb, by = "ID") %>%
+  inner_join(., pri, by = "ID") %>%
+  select(x_coord, y_coord, LNF_Code, OBJECTVAL, YEAROFCHANGE, Nutzungsid) %>%
+  distinct() %>%
+  filter(!LNF_Code %in% lnf_codes_all)
+```
+
+At this point, we can load the dataset with all the points samples by Kampmann, Hohl and Peter. Then we can filter it to only the points that are not inside the agricultural area.
+
+```{r}
+khp <- read_csv("/Users/marco/GitHub/GitHub_G4B/2023_re-survey/2_generated_data/Coord_Kamp_Peter_Hohl_v4.csv") %>% 
+  filter()
+```

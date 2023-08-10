@@ -12,7 +12,7 @@ library(sp)
 setwd("/Users/marco/GitHub/graslandvielfalt/R_files")
 source("./config_plot_map.R")
 
-#municipalities <- st_read("./gadm41_CHE.gpkg", layer = "ADM_ADM_3")
+municipalities <- st_read("./gadm41_CHE.gpkg", layer = "ADM_ADM_3")
 
 #plots <- read_csv("./2023-joinedPlotSelection_v2.csv") %>%
 #  get_municipality(., municipalities, what = c("NAME_1", "NAME_3")) %>%
@@ -31,20 +31,50 @@ source("./config_plot_map.R")
 
 #write_csv(plots, "./2023-joinedPlotSelection_v3.csv")
 
-donePlots <- read_csv("./2023-donePlots.csv") %>%
-  filter(Done == 1)
+#donePlots <- read_csv("./2023-donePlots.csv") %>%
+#  filter(Done == 1)
 
 # Read the data from the Google Sheet
 gsheet <- read_sheet("https://docs.google.com/spreadsheets/d/1rIDiZIn6EFSC1ifOlfHDeNpUIWRYYqZDQa5PPJdeaog/edit#gid=123", sheet = "Sheet1") %>%
   mutate_all(as.character) %>%
   filter(done_veg == 1)
 
-
 plots <- read_csv("./2023-joinedPlotSelection_v3.csv") %>%
   filter(!priority %in% c("MP5", "MP6", "MP7")) %>%
   mutate(link = paste0("http://www.google.ch/maps/place/", Latitude, ",", Longitude)) %>%
-  left_join(gsheet %>% select("ID", "date_veg", "coord_inprec", "moss"), by = "ID") %>%
-  mutate(sID = sub("^[^-]*-", "", ID))
+  inner_join(gsheet %>% dplyr::select("ID", "date_veg", "coord_inprec", "moss"), by = "ID") %>%
+  mutate(sID = gsub("-", "", sub("^[^-]*-", "", ID, ignore.case = TRUE)))
+
+tobia <- read_csv("./tobia-non-grassland-plots.csv") %>%
+    get_municipality(., municipalities, what = c("NAME_1", "NAME_3")) %>%
+    rename(canton = NAME_1,
+           municipality = NAME_3,
+           plotID = rn) %>%
+    mutate(priority = gsub("P", "T", priority),
+           LU2020 = ifelse(AS18_72 %in% c(50:60), "Wald", "Gebüsch"),
+           link = paste0("http://www.google.ch/maps/place/", Latitude, ",", Longitude)) %>%
+    arrange(priority, canton, municipality, elevation) %>%
+    group_by(municipality) %>%
+    mutate(ID = paste0(priority, "-",
+                       toupper(substr(canton, 1, 2)), "-", 
+                       toupper(substr(municipality, 1, 2)), "-", 
+                       row_number())) %>%
+    ungroup() %>%
+    dplyr::select(-editor, -taxon, -date, -year) %>%
+    mutate(exposition = as.character(exposition))
+
+# Grouping data by municipality and class, then summarizing the counts
+class_counts <- tobia %>%
+  group_by(municipality, LU2020) %>%
+  summarize(count = n())
+
+# Creating a stacked bar plot
+ggplot(class_counts, aes(x = municipality, y = count, fill = LU2020)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Municipality", y = "Count", title = "Class Counts per Municipality") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_brewer(palette = "Set3")
 
 #gps <- read_tsv("./gps/2023-05-23-1116-bkp2.txt") %>% as.data.frame()
 #write_csv(gps, "./gps/2023-05-23-1116-bkp2-to-clean.csv")
@@ -52,39 +82,34 @@ gps <- read_csv("./gps/2023-05-23-1116-bkp2-clean_v3.csv") %>%
   mutate(sID = toupper(ifelse(nchar(Punkt_ID_G4B) <= 6,
                                        gsub("^(.{2})(.{2})", "\\1-\\2-", Punkt_ID_G4B),
                              sub("^[^-]*-", "", Punkt_ID_G4B)))) %>%
-  select(-ID) %>%
-  left_join(plots, by = "sID")
+  dplyr::select(-ID) %>%
+  left_join(plots, by = "sID") %>%
+  bind_rows(tobia)
 
 plots <- plots %>%
-  left_join(gps %>% select(sID, Korrtyp), by = "sID")
+  left_join(gps %>% dplyr::select(sID, Korrtyp), by = "sID") %>%
+  mutate(LU2020 = as.character(ifelse(TRUE, "BFF", "NOT_BFF"))) %>%
+  bind_rows(tobia) %>%
+  dplyr::select(Latitude, Longitude, ID, sID, plotID, elevation, slope, LU2020, AS18_72, everything())
 
-#be <- rgdal::readOGR("/Users/marco/kDocuments_Marco/PhD/server/1_original_data/shapefiles/be_bewirtschaftungseinheit_view.shp")
-
-#poly <- be %>%
-#  get_polygons(plots = plots, shapefile = ., radius_m = 500)
+#be <- rgdal::readOGR("/Users/marco/kDocuments_Marco/PhD/old/server/1_original_data/shapefiles/be_bewirtschaftungseinheit_view.shp")
 #
-#writeOGR(poly, dsn = "./2023-plots-with-be-poly.geojson", 
+#poly <- be %>%
+#  get_polygons(plots = plots, shapefile = ., radius_m = 200)
+#
+#writeOGR(poly, dsn = "./2023-plots-with-be-poly-wTobia.geojson", 
 #         layer = ogrListLayers("/Users/marco/kDocuments_Marco/PhD/server/1_original_data/shapefiles/be_bewirtschaftungseinheit_view.shp")[1],
 #         driver = "GeoJSON")
 
-poly <- rgdal::readOGR("./2023-plots-with-be-poly.geojson")
+poly <- rgdal::readOGR("./2023-plots-with-be-poly-wTobia.geojson")
 
 ########################################################################################################################################
 ### Create plot table #################################################################################################################
 ########################################################################################################################################
-  
+
 (t <- DT::datatable(plots %>% 
                       mutate(ID = paste0('<a target="_parent" href=', .$link, '>', .$ID, ' </a>', sep = "")) %>%
-                      select(-Latitude, -Longitude, -link, -P.Test.CO2., -Nutzungsid, -coord_inprec),
-                    class = "display nowrap",
-                    escape = F,
-                    rownames = FALSE))
-
-htmltools::save_html(t, file="2023-plot-table-andrea.html")
-
-(t <- DT::datatable(plots %>% filter(!ID %in% gsheet$ID) %>%
-                      mutate(ID = paste0('<a target="_parent" href=', .$link, '>', .$ID, ' </a>', sep = "")) %>%
-                      select(-Latitude, -Longitude, -link, -P.Test.CO2., -Nutzungsid, -coord_inprec),
+                      dplyr::select(-Latitude, -Longitude, -link, -P.Test.CO2., -Nutzungsid, -coord_inprec),
                     class = "display nowrap",
                     escape = F,
                     rownames = FALSE))
@@ -98,7 +123,7 @@ htmltools::save_html(t, file="2023-plot-table.html")
 
 # Define a color palette with distinct colors
 pal <- colorFactor(
-  palette = c("red", "orange", "yellow", "green", "blue", "purple", "magenta"),
+  palette = c("red", "orange", "yellow", "green", "cyan", "royalblue", "purple", "magenta"),
   domain = plots$priority
 )
 
@@ -144,10 +169,9 @@ pal <- colorFactor(
 #)
 
 # Filter the points with LU2020 column set to true
-DONE_BFF <- plots %>% filter(LU2020 == TRUE) %>% filter(ID %in% gsheet$ID)
-DONE_NON_BFF <- plots %>% filter(LU2020 == FALSE | is.na(LU2020))%>% filter(ID %in% gsheet$ID)
-BFF <- plots %>% filter(LU2020 == TRUE) %>% filter(!ID %in% gsheet$ID)
-NON_BFF <- plots %>% filter(LU2020 == FALSE | is.na(LU2020))%>% filter(!ID %in% gsheet$ID)
+Tobia <- plots %>% filter(priority == "T1" | priority == "T2")
+Andrea <- plots %>% filter(priority == "P1" | priority == "P2" | priority == "P3")
+Marco <- plots %>% filter(priority == "MP1" | priority == "MP2" | priority == "MP3" | priority == "MP4")
 
 (m <- leaflet(plots) %>%
     addTiles(urlTemplate = "https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg",
@@ -157,61 +181,50 @@ NON_BFF <- plots %>% filter(LU2020 == FALSE | is.na(LU2020))%>% filter(!ID %in% 
              attribution = '&copy; <a href="https://www.geo.admin.ch/de/about-swiss-geoportal/impressum.html#copyright">swisstopo</a>',
              group = "Satellite View") %>%
     
-    addCircleMarkers(data = DONE_BFF, 
+    addCircleMarkers(data = Tobia, 
                      lat = ~Latitude, lng = ~Longitude,
                      popup = ~paste(paste0('<a target=\"_parent\" href=', link, '>', ID, ' </a>', sep = ""), 
                                     "<br>Elevation: ", round(as.numeric(elevation), 0), 
                                     "<br>Date veg: ", date_veg,
                                     "<br>",
+                                    "<br><b>LU2020:</b> ", LU2020, 
                                     "<br><b>Korrtyp:</b> ", Korrtyp, 
                                     "<br><b>Slope:</b> ", round(as.numeric(slope), 0), 
                                     "<br><b>Moss collected:</b> ", moss,
                                     
                                     sep = ""),
                      radius = 8, stroke = FALSE, fillOpacity = 1, color = ~pal(priority),
-                     group = "DONE_BFF") %>%
+                     group = "Tobia") %>%
     
-    addCircleMarkers(data = DONE_NON_BFF, 
+    addCircleMarkers(data = Andrea, 
                      lat = ~Latitude, lng = ~Longitude,
                      popup = ~paste(paste0('<a target=\"_parent\" href=', link, '>', ID, ' </a>', sep = ""), 
                                     "<br>Elevation: ", round(as.numeric(elevation), 0), 
                                     "<br>Date veg: ", date_veg,
                                     "<br>",
+                                    "<br><b>LU2020:</b> ", LU2020, 
                                     "<br><b>Korrtyp:</b> ", Korrtyp, 
                                     "<br><b>Slope:</b> ", round(as.numeric(slope), 0), 
                                     "<br><b>Moss collected:</b> ", moss,
                                     
                                     sep = ""),
                      radius = 8, stroke = FALSE, fillOpacity = 1, color = ~pal(priority),
-                     group = "DONE_NON_BFF") %>%
+                     group = "Andrea") %>%
     
-    addCircleMarkers(data = BFF, 
+    addCircleMarkers(data = Marco, 
                      lat = ~Latitude, lng = ~Longitude,
                      popup = ~paste(paste0('<a target=\"_parent\" href=', link, '>', ID, ' </a>', sep = ""), 
                                     "<br>Elevation: ", round(as.numeric(elevation), 0), 
                                     "<br>Date veg: ", date_veg,
                                     "<br>",
+                                    "<br><b>LU2020:</b> ", LU2020, 
                                     "<br><b>Korrtyp:</b> ", Korrtyp, 
                                     "<br><b>Slope:</b> ", round(as.numeric(slope), 0), 
                                     "<br><b>Moss collected:</b> ", moss,
                                     
                                     sep = ""),
                      radius = 8, stroke = FALSE, fillOpacity = 1, color = ~pal(priority),
-                     group = "BFF") %>%
-    
-    addCircleMarkers(data = NON_BFF, 
-                     lat = ~Latitude, lng = ~Longitude,
-                     popup = ~paste(paste0('<a target=\"_parent\" href=', link, '>', ID, ' </a>', sep = ""), 
-                                    "<br>Elevation: ", round(as.numeric(elevation), 0), 
-                                    "<br>Date veg: ", date_veg,
-                                    "<br>",
-                                    "<br><b>Korrtyp:</b> ", Korrtyp, 
-                                    "<br><b>Slope:</b> ", round(as.numeric(slope), 0), 
-                                    "<br><b>Moss collected:</b> ", moss,
-                                    
-                                    sep = ""),
-                     radius = 8, stroke = FALSE, fillOpacity = 1, color = ~pal(priority),
-                     group = "NON_BFF") %>%
+                     group = "Marco") %>%
     
     addLegend(pal = pal, values = plots$priority,
               position = "bottomright", title = "Value") %>%
@@ -242,10 +255,10 @@ NON_BFF <- plots %>% filter(LU2020 == FALSE | is.na(LU2020))%>% filter(!ID %in% 
     ) %>%
     addLayersControl(
       baseGroups = c("Swiss Topographic Map", "Satellite View"),
-      overlayGroups = c("DONE_BFF", "DONE_NON_BFF", "BFF", "NON_BFF", "Done Plots", "Bewirtschaftungseinheiten", "Public Transport Stops"),
+      overlayGroups = c("Tobia", "Andrea", "Marco", "Bewirtschaftungseinheiten", "Public Transport Stops"),
       options = layersControlOptions(collapsed = TRUE)
     ) %>%
-    hideGroup(c("DONE_BFF", "DONE_NON_BFF", "Bewirtschaftungseinheiten", "Public Transport Stops", "Done Plots")) %>%
+    hideGroup(c("Bewirtschaftungseinheiten", "Public Transport Stops")) %>%
     addFullscreenControl() %>%
     addEasyButton(
       easyButton(
@@ -272,7 +285,6 @@ NON_BFF <- plots %>% filter(LU2020 == FALSE | is.na(LU2020))%>% filter(!ID %in% 
       )
     )
 )
-
 
 # Add fullscreen button
 
