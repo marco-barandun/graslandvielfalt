@@ -7,6 +7,7 @@ library(htmltools)
 library(googlesheets4)
 library(mapview)
 library(sp)
+library(sf)
 
 setwd("/Users/marco/GitHub/graslandvielfalt/R_files")
 source("./config_plot_map.R")
@@ -87,7 +88,7 @@ gps <- read_csv("./gps/2023-05-23-1116-bkp2-clean_v3.csv") %>%
 
 plots <- plots %>%
   left_join(gps %>% dplyr::select(sID, Korrtyp), by = "sID") %>%
-  mutate(LU2020 = as.character(ifelse(TRUE, "BFF", "NOT_BFF"))) %>%
+  mutate(LU2020 = as.character(if_else(LU2020 == TRUE, "BFF", "NOT_BFF"))) %>%
   bind_rows(tobia) %>%
   dplyr::select(Latitude, Longitude, ID, sID, plotID, elevation, slope, LU2020, AS18_72, everything())
 
@@ -165,11 +166,6 @@ pal <- colorFactor(
 #  hideGroup("Bewirtschaftungseinheiten") #"MP3", "MP4", "MP5", "MP6", "MP7", "P2", "P3"
 #)
 
-# Filter the points with LU2020 column set to true
-Tobia <- plots %>% filter(priority == "T1" | priority == "T2")
-Andrea <- plots %>% filter(priority == "P1" | priority == "P2" | priority == "P3")
-Marco <- plots %>% filter(priority == "MP1" | priority == "MP2" | priority == "MP3" | priority == "MP4")
-
 (m <- leaflet(plots) %>%
     addTiles(urlTemplate = "https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg",
              attribution = '&copy; <a href="https://www.geo.admin.ch/de/about-swiss-geoportal/impressum.html#copyright">swisstopo</a>',
@@ -178,7 +174,7 @@ Marco <- plots %>% filter(priority == "MP1" | priority == "MP2" | priority == "M
              attribution = '&copy; <a href="https://www.geo.admin.ch/de/about-swiss-geoportal/impressum.html#copyright">swisstopo</a>',
              group = "Satellite View") %>%
     
-    addCircleMarkers(data = Tobia, 
+    addCircleMarkers(data = plots %>% filter(priority == "T1" | priority == "T2"), 
                      lat = ~Latitude, lng = ~Longitude,
                      popup = ~paste(paste0('<a target=\"_parent\" href=', link, '>', ID, ' </a>', sep = ""), 
                                     "<br>Elevation: ", round(as.numeric(elevation), 0), 
@@ -193,7 +189,7 @@ Marco <- plots %>% filter(priority == "MP1" | priority == "MP2" | priority == "M
                      radius = 8, stroke = FALSE, fillOpacity = 1, color = ~pal(priority),
                      group = "Tobia") %>%
     
-    addCircleMarkers(data = Andrea, 
+    addCircleMarkers(data = plots %>% filter(priority == "P1" | priority == "P2" | priority == "P3"), 
                      lat = ~Latitude, lng = ~Longitude,
                      popup = ~paste(paste0('<a target=\"_parent\" href=', link, '>', ID, ' </a>', sep = ""), 
                                     "<br>Elevation: ", round(as.numeric(elevation), 0), 
@@ -210,7 +206,7 @@ Marco <- plots %>% filter(priority == "MP1" | priority == "MP2" | priority == "M
                      radius = 8, stroke = FALSE, fillOpacity = 1, color = ~pal(priority),
                      group = "Andrea") %>%
     
-    addCircleMarkers(data = Marco, 
+    addCircleMarkers(data = plots %>% filter(priority == "MP1" | priority == "MP2" | priority == "MP3" | priority == "MP4"), 
                      lat = ~Latitude, lng = ~Longitude,
                      popup = ~paste(paste0('<a target=\"_parent\" href=', link, '>', ID, ' </a>', sep = ""), 
                                     "<br>Elevation: ", round(as.numeric(elevation), 0), 
@@ -286,6 +282,9 @@ Marco <- plots %>% filter(priority == "MP1" | priority == "MP2" | priority == "M
       )
     )
 )
+
+nrow(plots %>% filter(priority == "MP2" | priority == "MP3"))
+
 
 # Add fullscreen button
 
