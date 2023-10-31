@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.1">Jekyll</generator><link href="http://localhost:4000/graslandvielfalt/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/graslandvielfalt/" rel="alternate" type="text/html" /><updated>2023-10-31T10:08:13+01:00</updated><id>http://localhost:4000/graslandvielfalt/feed.xml</id><title type="html">Graslandvielfalt</title><subtitle>My personal website</subtitle><author><name>Marco Barandun</name></author><entry><title type="html">MSc thesis - Grasshopper Biogeography</title><link href="http://localhost:4000/graslandvielfalt/news/opportunity/2023/10/15/msc-grasshopper-biogeography-copy.html" rel="alternate" type="text/html" title="MSc thesis - Grasshopper Biogeography" /><published>2023-10-15T00:00:00+02:00</published><updated>2023-10-15T00:00:00+02:00</updated><id>http://localhost:4000/graslandvielfalt/news/opportunity/2023/10/15/msc-grasshopper-biogeography%20copy</id><content type="html" xml:base="http://localhost:4000/graslandvielfalt/news/opportunity/2023/10/15/msc-grasshopper-biogeography-copy.html"><![CDATA[<p>Grassland management practices are changing. Some grasslands are being abandoned, others are becoming more intensive, and some are shifting towards a more extensive management. Our research aims to explore these transformations across different biogeographic regions in Switzerland and assess their impact on biodiversity.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.1">Jekyll</generator><link href="http://localhost:4000/graslandvielfalt/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/graslandvielfalt/" rel="alternate" type="text/html" /><updated>2023-10-31T10:31:32+01:00</updated><id>http://localhost:4000/graslandvielfalt/feed.xml</id><title type="html">Graslandvielfalt</title><subtitle>My personal website</subtitle><author><name>Marco Barandun</name></author><entry><title type="html">MSc thesis - Grasshopper Biogeography</title><link href="http://localhost:4000/graslandvielfalt/news/opportunity/2023/10/15/msc-grasshopper-biogeography-copy.html" rel="alternate" type="text/html" title="MSc thesis - Grasshopper Biogeography" /><published>2023-10-15T00:00:00+02:00</published><updated>2023-10-15T00:00:00+02:00</updated><id>http://localhost:4000/graslandvielfalt/news/opportunity/2023/10/15/msc-grasshopper-biogeography%20copy</id><content type="html" xml:base="http://localhost:4000/graslandvielfalt/news/opportunity/2023/10/15/msc-grasshopper-biogeography-copy.html"><![CDATA[<p>Grassland management practices are changing. Some grasslands are being abandoned, others are becoming more intensive, and some are shifting towards a more extensive management. Our research aims to explore these transformations across different biogeographic regions in Switzerland and assess their impact on biodiversity.</p>
 
 <p>This MSc project focusses on the interaction between grassland management and grasshoppers communities. Grasshoppers are among the most charismatic and characteristic fauna of grasslands. They serve as valuable indicators of grassland management practices. This project aims to understand the variations in grasshopper communities across biogeographic regions in Switzerland. You will have the opportunity to travel to mountainous areas, where you’ll visit various meadows with different managements and conduct surveys to assess the current grasshopper communities. Following fieldwork, we will provide additional data related to the vegetation of the study sites, along with supplementary grasshopper surveys.</p>
 
@@ -14,67 +14,46 @@ This MSc project focusses on grassland vegetation composition.</p>
 
 <p>More details can be found <a href="https://marco-barandun.gihub.io/docs/msc-management-biogeography-f.pdf">here</a>.</p>]]></content><author><name>Marco Barandun</name></author><category term="opportunity" /><summary type="html"><![CDATA[Grassland management practices are changing. Some grasslands are being abandoned, others are becoming more intensive, and some are shifting towards a more extensive management. Our research aims to explore these transformations across different biogeographic regions in Switzerland and assess their impact on biodiversity. This MSc project focusses on grassland vegetation composition.]]></summary></entry><entry><title type="html">Grasshopper surveys, done!</title><link href="http://localhost:4000/graslandvielfalt/news/research/2023/09/15/end-of-orth-surv-2023.html" rel="alternate" type="text/html" title="Grasshopper surveys, done!" /><published>2023-09-15T00:00:00+02:00</published><updated>2023-09-15T00:00:00+02:00</updated><id>http://localhost:4000/graslandvielfalt/news/research/2023/09/15/end-of-orth-surv-2023</id><content type="html" xml:base="http://localhost:4000/graslandvielfalt/news/research/2023/09/15/end-of-orth-surv-2023.html"><![CDATA[<p>Back in July I had no clue of how to identify grasshoppers, however after a very steep learning curve and two months of grasshopper fieldwork I can can definitely say, grasshoppers are awesome!</p>
 
-<div class="row"> 
-  <div class="column">
-        <img src="https://marco-barandun.github.io/graslandvielfalt/img/post_orth_done/1.jpg" />&lt;/a&gt;
-        <img src="https://marco-barandun.github.io/graslandvielfalt/img/post_orth_done/1.jpg" />&lt;/a&gt;
-        <img src="https://marco-barandun.github.io/graslandvielfalt/img/post_orth_done/1.jpg" />&lt;/a&gt;
-    <a href="/graslandvielfalt/sarracenia/species/Sarracenia_minor">
-        <img src="http://www.sarracenia.com/photos/sarracenia/sarraalata013.jpg" /></a>
+<div style="display:flex;">
+  <div style="flex:1; padding-right:10px;">
+    <figure>
+      <img src="https://marco-barandun.github.io/graslandvielfalt/img/post_orth_done/1.jpg" alt="Gomphocerus sibiricus" />
+      <figcaption>Gomphocerus sibiricus</figcaption>
+    </figure>
   </div>
-  <div class="column">
-    <a href="/graslandvielfalt/sarracenia/species/Sarracenia_oreophila">
-        <img src="http://www.sarracenia.com/photos/sarracenia/sarraalata013.jpg" /></a>
-    <a href="/graslandvielfalt/sarracenia/species/Sarracenia_psittacina">
-        <img src="http://www.sarracenia.com/photos/sarracenia/sarraalata013.jpg" /></a>
-    <a href="/graslandvielfalt/sarracenia/species/Sarracenia_purpurea">
-        <img src="http://www.sarracenia.com/photos/sarracenia/sarraalata013.jpg" /></a>
-    <a href="/graslandvielfalt/sarracenia/species/Sarracenia_rosea">
-        <img src="http://www.sarracenia.com/photos/sarracenia/sarraalata013.jpg" /></a>
-  </div> 
-    <div class="column">
-    <a href="/graslandvielfalt/sarracenia/species/Sarracenia_rubra">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/a/aa/Sarracenia_leucophylla_at_the_Brooklyn_Botanic_Garden_%2881396%29b.jpg" /></a>
-    <a href="/graslandvielfalt/sarracenia/species/Hybrids">
-        <img src="http://www.sarracenia.com/photos/sarracenia/sarraalata013.jpg" /></a>
-    <a href="/graslandvielfalt/sarracenia/species/Sarracenia_alata">
-        <img src="http://www.sarracenia.com/photos/sarracenia/sarraalata013.jpg" /></a>
-    <a href="/graslandvielfalt/sarracenia/species/Sarracenia_alata">
-        <img src="http://www.sarracenia.com/photos/sarracenia/sarraalata013.jpg" /></a>
-  </div> 
+  <div style="flex:1; padding-right:10px;">
+    <figure>
+      <img src="https://marco-barandun.github.io/graslandvielfalt/img/post_orth_done/2.jpg" alt="baby Arcyptera fusca" />
+      <figcaption>Baby Arcyptera fusca</figcaption>
+    </figure>
+  </div>
+  <div style="flex:1; padding-right:10px;">
+    <figure>
+      <img src="https://marco-barandun.github.io/graslandvielfalt/img/post_orth_done/3.jpg" alt="weirdly pink Gomphocerippus rufus" />
+      <figcaption>Weirdly Pink Gomphocerippus rufus</figcaption>
+    </figure>
+  </div>
 </div>]]></content><author><name>Marco Barandun</name></author><category term="research" /><summary type="html"><![CDATA[Back in July I had no clue of how to identify grasshoppers, however after a very steep learning curve and two months of grasshopper fieldwork I can can definitely say, grasshoppers are awesome!]]></summary></entry><entry><title type="html">Vegetation surveys, done!</title><link href="http://localhost:4000/graslandvielfalt/news/research/2023/07/15/end-of-veg-surv-2023.html" rel="alternate" type="text/html" title="Vegetation surveys, done!" /><published>2023-07-15T00:00:00+02:00</published><updated>2023-07-15T00:00:00+02:00</updated><id>http://localhost:4000/graslandvielfalt/news/research/2023/07/15/end-of-veg-surv-2023</id><content type="html" xml:base="http://localhost:4000/graslandvielfalt/news/research/2023/07/15/end-of-veg-surv-2023.html"><![CDATA[<p>Two intense months, but absolutely rewarding! We’ve successfully surveyed over 150 grasslands throughout Switzerland. Now, it’s time for a day or two of well-deserved rest before diving into the world of grasshoppers. I’ve already spotted several adults in action, so let’s keep the momentum going!</p>
 
-<div class="row"> 
-  <div class="column">
-    <a href="/graslandvielfalt/sarracenia/species/Sarracenia_alata">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Sarracenia_alata_flowers.jpg/1200px-Sarracenia_alata_flowers.jpg" /></a>
-    <a href="/graslandvielfalt/sarracenia/species/Sarracenia_flava">
-        <img src="http://www.sarracenia.com/photos/sarracenia/sarraalata013.jpg" /></a>
-    <a href="/graslandvielfalt/sarracenia/species/Sarracenia_leucophylla">
-        <img src="http://www.sarracenia.com/photos/sarracenia/sarraalata013.jpg" /></a>
-    <a href="/graslandvielfalt/sarracenia/species/Sarracenia_minor">
-        <img src="http://www.sarracenia.com/photos/sarracenia/sarraalata013.jpg" /></a>
+<div style="display:flex;">
+  <div style="flex:1; padding-right:10px;">
+    <figure>
+      <img src="https://marco-barandun.github.io/graslandvielfalt/img/post-veg-done-23/1.jpg" alt="Paradisea liliastrum" />
+      <figcaption>Gomphocerus sibiricus</figcaption>
+    </figure>
   </div>
-  <div class="column">
-    <a href="/graslandvielfalt/sarracenia/species/Sarracenia_oreophila">
-        <img src="http://www.sarracenia.com/photos/sarracenia/sarraalata013.jpg" /></a>
-    <a href="/graslandvielfalt/sarracenia/species/Sarracenia_psittacina">
-        <img src="http://www.sarracenia.com/photos/sarracenia/sarraalata013.jpg" /></a>
-    <a href="/graslandvielfalt/sarracenia/species/Sarracenia_purpurea">
-        <img src="http://www.sarracenia.com/photos/sarracenia/sarraalata013.jpg" /></a>
-    <a href="/graslandvielfalt/sarracenia/species/Sarracenia_rosea">
-        <img src="http://www.sarracenia.com/photos/sarracenia/sarraalata013.jpg" /></a>
-  </div> 
-    <div class="column">
-    <a href="/graslandvielfalt/sarracenia/species/Sarracenia_rubra">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/a/aa/Sarracenia_leucophylla_at_the_Brooklyn_Botanic_Garden_%2881396%29b.jpg" /></a>
-    <a href="/graslandvielfalt/sarracenia/species/Hybrids">
-        <img src="http://www.sarracenia.com/photos/sarracenia/sarraalata013.jpg" /></a>
-    <a href="/graslandvielfalt/sarracenia/species/Sarracenia_alata">
-        <img src="http://www.sarracenia.com/photos/sarracenia/sarraalata013.jpg" /></a>
-    <a href="/graslandvielfalt/sarracenia/species/Sarracenia_alata">
-        <img src="http://www.sarracenia.com/photos/sarracenia/sarraalata013.jpg" /></a>
-  </div> 
+  <div style="flex:1; padding-right:10px;">
+    <figure>
+      <img src="https://marco-barandun.github.io/graslandvielfalt/img/post-veg-done-23/2.jpg" alt="Dianthus superbus" />
+      <figcaption>Baby Arcyptera fusca</figcaption>
+    </figure>
+  </div>
+  <div style="flex:1; padding-right:10px;">
+    <figure>
+      <img src="https://marco-barandun.github.io/graslandvielfalt/img/post-veg-done-23/3.jpg" alt="end of a beautiful day" />
+      <figcaption>Weirdly Pink Gomphocerippus rufus</figcaption>
+    </figure>
+  </div>
 </div>]]></content><author><name>Marco Barandun</name></author><category term="research" /><summary type="html"><![CDATA[Two intense months, but absolutely rewarding! We’ve successfully surveyed over 150 grasslands throughout Switzerland. Now, it’s time for a day or two of well-deserved rest before diving into the world of grasshoppers. I’ve already spotted several adults in action, so let’s keep the momentum going!]]></summary></entry><entry><title type="html">Start of the 2023 field season!</title><link href="http://localhost:4000/graslandvielfalt/news/research/2023/05/15/field-season-2023-start.html" rel="alternate" type="text/html" title="Start of the 2023 field season!" /><published>2023-05-15T00:00:00+02:00</published><updated>2023-05-15T00:00:00+02:00</updated><id>http://localhost:4000/graslandvielfalt/news/research/2023/05/15/field-season-2023-start</id><content type="html" xml:base="http://localhost:4000/graslandvielfalt/news/research/2023/05/15/field-season-2023-start.html"><![CDATA[<p>Ropes, GPS, car, drone, … all ready! No, I am not going on holiday, the first field season of my PhD is about to start… looking forward to travel all over Switzerland to survey grasslands!</p>
 
 <figure>
