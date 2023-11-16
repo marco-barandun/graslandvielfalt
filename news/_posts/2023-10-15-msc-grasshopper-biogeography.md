@@ -12,5 +12,5 @@ This MSc project focusses on the interaction between grassland management and gr
 
 Depending on the student's skills and interests, modelling approaches can be considered.
 
-More details can be found <a href="https://marco-barandun.gihub.io/docs/msc-grasshopper-biogeography-f.pdf">here</a>.
+More details can be found <a href="https://github.com/marco-barandun/graslandvielfalt/blob/main/docs/msc-grasshopper-biogeography-f.pdf?raw=true">here</a>.
 

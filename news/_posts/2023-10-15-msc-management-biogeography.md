@@ -14,5 +14,5 @@ During the field season, you will have the opportunity to travel to mountainous 
 
 Depending on the student's skills and interests, modelling approaches can be considered.
 
-More details can be found <a href="https://marco-barandun.gihub.io/docs/msc-management-biogeography-f.pdf">here</a>.
+More details can be found <a href="https://github.com/marco-barandun/graslandvielfalt/blob/main/docs/msc-management-biogeography-f.pdf?raw=true">here</a>.
 
