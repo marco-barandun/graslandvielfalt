@@ -6,7 +6,7 @@ background: '/img/bg-map.png'
 
 ---
 
-Nach der Vegetationsaufnahme immer am gleichen Ort noch ein Foto des Aufnahmeblatt machen (Blackup).
+Nach der Vegetationsaufnahme immer am gleichen Ort noch ein Foto des Aufnahmeblatt machen (Backup).
 Wenn dann am Abend Zeit vorhanden ist, bitte das Datum der Vegetationsaufnahme auf dem folgenden [Link](https://docs.google.com/spreadsheets/d/18OhC-qRRPqjAoWVBoqvb83dQHAMBc_bAA3rGWx4-YAE/edit?usp=sharing) ausfüllen. So kann ich die Karte aktualisieren.
 
 ## Map
