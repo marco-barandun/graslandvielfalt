@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "a205623fb07c5d3f",
+        "id": "37636387008278db",
         "type": "tabs",
         "children": [
           {
-            "id": "a391b1125997e1aa",
+            "id": "9a635a5b588186c9",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "page-interviews.md",
-                "mode": "source",
-                "source": true
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "page-interviews"
+              "title": "New tab"
             }
           }
         ]
@@ -160,6 +156,7 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "bases:Create new base": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
@@ -168,6 +165,8 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "a391b1125997e1aa",
-  "lastOpenFiles": []
+  "active": "9a635a5b588186c9",
+  "lastOpenFiles": [
+    "page-interviews.md"
+  ]
 }
